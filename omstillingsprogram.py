@@ -1,3 +1,3 @@
 import variablehenting
 
-variablehenting.les_fra_fil()
+variablehenting.hent_ut_variabler()
