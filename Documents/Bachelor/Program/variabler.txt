@@ -1,0 +1,4 @@
+I dette tekstdokumentet skal det være  mulig å legge inn alt av variabler
+
+a=3
+b=4
