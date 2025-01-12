@@ -1,8 +1,6 @@
 I dette tekstdokumentet skal det være  mulig å legge inn alt av variabler
 
-a = 3
-b = 4
-#c = 5
+Fs = 8000 #samplingsfrekvens
+f = 100 #frekvens
+s = 8000 #samplepunkter
 
-d = 6
-e = 7#e = 8
