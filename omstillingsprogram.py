@@ -2,15 +2,20 @@ import variablehenting
 import mattefunksjoner
 
 def main():
-    Fs,f,pri,prf,dc = variablehenting.separer_variabler()
-    if Fs == 0:
-        Fs = 20 * f  # Default sampling frequency    
-    sine_wave = mattefunksjoner.sine_wave(Fs,f)
-    square_wave = mattefunksjoner.square_wave(Fs,f,pri,prf,dc)
-    result = sine_wave * square_wave
-    mattefunksjoner.plot_result(result,f,Fs)
+    #Kaller opp en funksjon som leser og separerer variabler fra en fil, variabler.txt
+    #Denne funksjonen returnerer en rekke forskjellige variabler som skal benyttes senere.
+    Fs,f,pri,prf,dc,t = variablehenting.separer_variabler()
+    
+    #Genererer en sinusfunksjon basert på variablene som er hentet fra forrige funksjon 
+    sinus_bølge = mattefunksjoner.sinus_bølge(Fs,f,t)
+    #Genererer en firantpuls basert på variablene definert i variabel filen
+    firkant_puls = mattefunksjoner.firkantpuls(Fs,f,pri,prf,dc)
+    #Multipliserer sammen firkantpuls og genererer en pulsbølge
+    resultat = sinus_bølge * firkant_puls
+    #Plotter resultatet
+    mattefunksjoner.plott_resultat(resultat,f,Fs)
 
 
-  
+
 if __name__ == "__main__":
     main()

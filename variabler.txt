@@ -1,7 +1,2 @@
 I dette tekstdokumentet skal det være  mulig å legge inn alt av variabler
 
-
-
-f = 1000
-PRF = 20
-DC = 0.1
