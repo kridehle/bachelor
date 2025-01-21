@@ -33,7 +33,19 @@ def hent_ut_variabler():#henter ut filer fra conten, og lager en ordliste
     
 def separer_variabler():
     variabler=hent_ut_variabler()#henter ut en ordbok
-    Fs = variabler.get('Fs') #henter ut verdi Fs
-    f = variabler.get('f') #henter uf verdi f
+    Fs = variabler.get('Fs',0) #henter ut verdi Fs
+    if Fs == 0:
+        print("Samplingsfrekvens ikke angitt. Settes til 20 * f")
+    f = variabler.get('f',0) #henter uf verdi f
+    if f == 0:
+        print("Frekvens ikke angitt. Settes til 1kHz")
+        f = 1e3
     s = variabler.get('s') #henter ut verdi s
-    return Fs,f,s 
+    pri = variabler.get('PRI',0)
+    if pri == 0:
+        print("PRI ikke angitt. Settes ikke")
+    prf = variabler.get('PRF',0)
+    if prf == 0:
+        print("PRF ikke angitt. Settes ikke")
+    dc = variabler.get('DC',0)
+    return Fs,f,pri,prf,dc
