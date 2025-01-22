@@ -4,16 +4,24 @@ import mattefunksjoner
 def main():
     #Kaller opp en funksjon som leser og separerer variabler fra en fil, variabler.txt
     #Denne funksjonen returnerer en rekke forskjellige variabler som skal benyttes senere.
-    Fs,f,pri,prf,dc,t = variablehenting.separer_variabler()
-    
+    Fs,f,pri,prf,dc,t,pk = variablehenting.henter_variabler()
+    #Funksjon som legger alle variablene inn i selve matteprogrammet, som står for den faktiske omgjøringen
+    mattefunksjoner.globale_variabler(Fs,f,pri,prf,dc,t)
     #Genererer en sinusfunksjon basert på variablene som er hentet fra forrige funksjon 
-    sinus_bølge = mattefunksjoner.sinus_bølge(Fs,f,t)
+    
+    if pk == "ukodet":
+        valgt_bølge = mattefunksjoner.sinus_bølge()
+    elif pk == "chirp":
+        valgt_bølge = mattefunksjoner.chirp_bølge()
+    else:
+        print("Pulskoden angitt eksisterer ikke, eller er ikke implementert enda. Settes til vanlig sinusbølge")
+        valgt_bølge = mattefunksjoner.sinus_bølge()
     #Genererer en firantpuls basert på variablene definert i variabel filen
-    firkant_puls = mattefunksjoner.firkantpuls(Fs,f,pri,prf,dc)
+    firkant_puls = mattefunksjoner.firkantpuls()
     #Multipliserer sammen firkantpuls og genererer en pulsbølge
-    resultat = sinus_bølge * firkant_puls
+    resultat = valgt_bølge * firkant_puls
     #Plotter resultatet
-    mattefunksjoner.plott_resultat(resultat,f,Fs)
+    mattefunksjoner.plott_resultat(resultat)
 
 
 

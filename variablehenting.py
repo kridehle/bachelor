@@ -7,7 +7,7 @@ def les_fra_fil():#Funksjon som leser all data fra en fil, og separerer linjer.
     innhold = innhold.splitlines()#separerer linjer i content
     return innhold
 
-def hent_ut_variabler():#henter ut filer fra conten, og lager en ordliste
+def separerer_variabler():#henter ut filer fra conten, og lager en ordliste
     verdier = {}#ordlisten lages
     innhold = les_fra_fil()#kaller opp les fra fil, og legger innholdet i content
 
@@ -32,33 +32,56 @@ def hent_ut_variabler():#henter ut filer fra conten, og lager en ordliste
 
     return verdier #returnerer en ordbok
     
-def separer_variabler():
-    variabler=hent_ut_variabler()#henter ut en ordbok
+def henter_variabler():
+    variabler=separerer_variabler()#henter ut en ordbok
     f = variabler.get('f',0) #henter uf verdi f, setter til 0 dersom ikke valgt
     if f == 0:
-        print("Frekvens ikke angitt. Settes til 1kHz")
         f = 1e3
+        print(f"Frekvens ikke angitt. Settes til {f}Hz")
+    else:
+        print(f"Frekvens angitt er {f}Hz")
     
     Fs = variabler.get('fs',0) #henter ut verdi Fs
     if Fs == 0:
-        Fs = 20 * f
-        print("Samplingsfrekvens ikke angitt. Settes til 20 * f")
+        a = 40
+        Fs = a * f
+        print(f"Samplingsfrekvens ikke angitt. Settes til {a} * {f}Hz")
+    else:
+        print(f"Samplingsfrekvens angitt er {Fs}Hz")
+    
     s = variabler.get('s') #henter ut verdi s
     
     pri = variabler.get('pri',0)
     if pri == 0:
         print("PRI ikke angitt.")
+    else:
+        print(f"PRI anitt er {pri}s")
     
     prf = variabler.get('prf',0)
     if prf == 0:
         print("PRF ikke angitt.")
-    
+    else:
+        print(f"PRF angitt er {prf}Hz")
+
     dc = variabler.get('dc',0)
     if dc == 0:
-        print("Dutycycle ikke angitt. Setts til 0.1")
+        dc = 0.1
+        print(f"Dutycycle ikke angitt. Setts til {dc}")
+    else:
+        print(f"Dutycycle angitt er {dc}")
     
     t = variabler.get('t',0)
     if t == 0:
-        print("Ønsket tid ikke angitt. Settes til 0.1s")    
+        t = 0.1
+        print(f"Tid ikke angitt. Settes til {t}s")  
+    else:
+        print(f"Tid angitt er {t}s")
     
-    return Fs,f,pri,prf,dc,t
+    pk = variabler.get('pk', 'ukodet')    
+    if pk == 'ukodet':
+        print(f"Pulskoding ikke definert, settes til {pk}")
+    else:
+        print(f"Pulskoding angitt er {pk}")
+            
+    
+    return Fs,f,pri,prf,dc,t,pk

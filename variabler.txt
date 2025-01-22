@@ -1,2 +1,6 @@
 I dette tekstdokumentet skal det være  mulig å legge inn alt av variabler
 
+pk = chirp
+f = 500
+pri = 0.05
+fs = 100000
