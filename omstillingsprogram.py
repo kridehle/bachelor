@@ -16,12 +16,8 @@ def main():
     else:
         print("Pulskoden angitt eksisterer ikke, eller er ikke implementert enda. Settes til vanlig sinusbølge")
         valgt_bølge = mattefunksjoner.sinus_bølge()
-    #Genererer en firantpuls basert på variablene definert i variabel filen
-    firkant_puls = mattefunksjoner.firkantpuls()
-    #Multipliserer sammen firkantpuls og genererer en pulsbølge
-    resultat = valgt_bølge * firkant_puls
-    #Plotter resultatet
-    mattefunksjoner.plott_resultat(resultat)
+
+    mattefunksjoner.plott_resultat(valgt_bølge)
 
 
 

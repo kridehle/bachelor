@@ -64,7 +64,8 @@ def sinus_bølge():
     # Genererer sinusbølge
     sinus_bølge = np.sin(2 * np.pi * f * t)
     #Returnerer den genererte sinusbølgen
-    return sinus_bølge
+    modulert_bølge = sinus_bølge * firkantpuls()
+    return modulert_bølge
 
 #Funksjon som genererer en firkantpuls. Frekvens og duty cycle defineres av variablene i inputen. Hvis ingen 
 #ønskede verdier er gitt, settes det forhåndsdefinerte verdier.
@@ -75,12 +76,35 @@ def firkantpuls():
     firkantpuls = (square(2 * np.pi * f_firkant * t, duty=dc)+1)/2
     return firkantpuls
 
-
 def chirp_bølge():
+
     f0 = f
-    f1 = 5*f
-    chirp_bølge = chirp(t, f0=f0, t1=pwt, f1=f1, method='linear', phi=0)
-    return chirp_bølge
+    f1 = 10*f
+    firkant_bølge = firkantpuls()
+    chirp_varighet = pwt
+    
+    # Initier chirp-signalet
+    ch_bølge = np.zeros_like(t)
+
+    # Finn starten av hver firkantpuls-syklus
+    syklus_starter = np.where(np.diff((firkant_bølge != 0).astype(int)) == 1)[0] + 1
+
+    # Iterer over hver syklus og generer chirp
+    for start in syklus_starter:
+        slutt = start + int(chirp_varighet * fs)
+        slutt = min(slutt, len(t))  # Sørg for at vi ikke går utenfor tidsaksen
+        # Beregn tidsvinduet for chirp innenfor denne syklusen
+        ch_bølge[start:slutt] = chirp(
+            t[:slutt - start], f0, chirp_varighet, f1, method="linear"
+        )
+
+    return ch_bølge
+
+
+
+
+
+
 
 
 #Funksjon som plotter resultatet
