@@ -102,7 +102,7 @@ def chirp_bølge():
 
     return ch_bølge
 
-
+# Funksjon som inneholder forskjellige barker sekvenser
 def barker_kode(n):
     barker_sekvens = {
         2: [1, -1],
@@ -122,16 +122,18 @@ def barker_kode(n):
 
     return combined_wave
 
+# Funksjon som genererer et barker kodet signal
 def barker_bølge():
     n = 2 # Lengden på Barker-koden (kan endres ved behov)
-    barker_sekvens = barker_kode(n)  # Hent Barker-koden
+    barker_sekvens = barker_kode(n)  # Hent Barker-koden og lagrer en variant av den
     firkant_bølge = firkantpuls()  # Hent firkantpulsen for å styre aktivering
-    barker_varighet = pwt  # Varigheten til én Barker-sekvens er lik en pulsbredde
+    barker_varighet = pwt  # Varigheten til en Barker-sekvens er lik en pulsbredde
+                           # Samme tankegang som med Chirp
 
     # Initier Barker-signalet
-    barker_wave = np.zeros_like(t)
+    barker_bølge = np.zeros_like(t)
 
-    # Finn starten av hver firkantpuls-syklus
+    # Finn starten av hver firkantpuls-syklus. Firkantpulsen starter, eller er "på" når den ikke er 0
     syklus_starter = np.where(np.diff((firkant_bølge != 0).astype(int)) == 1)[0] + 1
 
     # Iterer over hver syklus og generer Barker-sekvensen
@@ -146,10 +148,10 @@ def barker_bølge():
         for i, bit in enumerate(barker_sekvens):
             bit_start = start + i * samples_per_bit
             bit_slutt = min(bit_start + samples_per_bit, slutt)
-            barker_wave[bit_start:bit_slutt] = bit
+            barker_bølge[bit_start:bit_slutt] = bit
 
-    barker_wave = barker_wave * sinus_bølge()
-    return barker_wave
+    barker_bølge = barker_bølge * sinus_bølge()
+    return barker_bølge
 
 #Funksjon som plotter resultatet
 def plott_resultat(final_wave):
