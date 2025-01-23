@@ -55,7 +55,7 @@ def henter_variabler():
     if pri == 0:
         print("PRI ikke angitt.")
     else:
-        print(f"PRI anitt er {pri}s")
+        print(f"PRI angitt er {pri}s")
     
     prf = variabler.get('prf',0)
     if prf == 0:

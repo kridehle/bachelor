@@ -13,6 +13,8 @@ def main():
         valgt_bølge = mattefunksjoner.sinus_bølge()
     elif pk == "chirp":
         valgt_bølge = mattefunksjoner.chirp_bølge()
+    elif pk == "barker":
+        valgt_bølge = mattefunksjoner.barker_bølge()
     else:
         print("Pulskoden angitt eksisterer ikke, eller er ikke implementert enda. Settes til vanlig sinusbølge")
         valgt_bølge = mattefunksjoner.sinus_bølge()
