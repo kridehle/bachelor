@@ -2,8 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import square
 from scipy.signal import chirp
+import random
 
-def globale_variabler(Fs,F,Pri,Prf,Dc,T):
+def globale_variabler(Fs,F,Pri,Prf,Dc,T,N):
     #setter global samplingsfrekvens
     global fs
     fs = Fs
@@ -61,6 +62,9 @@ def globale_variabler(Fs,F,Pri,Prf,Dc,T):
     global barker_lengde
     barker_lengde = 7
     
+    global n 
+    n = N
+    
 #Funksjon som lager en helt standard sinusbølge
 def sinus_bølge():
     # Genererer sinusbølge
@@ -77,6 +81,12 @@ def firkantpuls():
     #Dette for å kunne skru signalet av og på, og sende pulser.
     firkantpuls = (square(2 * np.pi * f_firkant * t, duty=dc)+1)/2
     return firkantpuls
+
+def jitter():
+    print('Her skal det komme en jitterfunksjon')
+    
+def stagger():
+    print('Her skal det komme en staggerfunksjon')
 
 # Funksjon for en pulskodet bølge. Chirp bølge
 def chirp_bølge():
@@ -124,7 +134,6 @@ def barker_kode(n):
 
 # Funksjon som genererer et barker kodet signal
 def barker_bølge():
-    n = 2 # Lengden på Barker-koden (kan endres ved behov)
     barker_sekvens = barker_kode(n)  # Hent Barker-koden og lagrer en variant av den
     firkant_bølge = firkantpuls()  # Hent firkantpulsen for å styre aktivering
     barker_varighet = pwt  # Varigheten til en Barker-sekvens er lik en pulsbredde
@@ -164,5 +173,5 @@ def plott_resultat(final_wave):
     plt.xlabel("Tid (s)")
     plt.ylabel("Amplitude")
     plt.grid(True)
-    plt.show()
-
+    plt.savefig('output.png')
+    plt.close()

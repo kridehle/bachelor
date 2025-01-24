@@ -82,6 +82,11 @@ def henter_variabler():
         print(f"Pulskoding ikke definert, settes til {pk}")
     else:
         print(f"Pulskoding angitt er {pk}")
+        
+    if pk == 'barker':
+        n = variabler.get('n',2)
+        print(f"Sekvens til barker angitt er {n}. Ønskes annen sekvens skriv n = x")
+    
             
     
-    return Fs,f,pri,prf,dc,t,pk
+    return Fs,f,pri,prf,dc,t,pk,n
