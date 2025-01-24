@@ -83,10 +83,19 @@ def henter_variabler():
     else:
         print(f"Pulskoding angitt er {pk}")
         
-    if pk == 'barker':
-        n = variabler.get('n',2)
-        print(f"Sekvens til barker angitt er {n}. Ønskes annen sekvens skriv n = x")
-    
-            
-    
-    return Fs,f,pri,prf,dc,t,pk,n
+
+    n = variabler.get('n',0)
+    if n == 0:
+        n = 2
+        print(f"Sekvens til barker ikke angitt. Verdien settes til {n}")
+    else:
+        print(f"Sekvens til barker angitt er {n}")
+        
+    mønster = variabler.get('pattern',0)
+    if mønster == 0:
+        mønster = 'fixed'
+        print(f"PRI møsnter ikke angitt, settes til {mønster}")
+    else:
+        print(f"PRI mønster angitt er {mønster}")
+
+    return Fs,f,pri,prf,dc,t,pk,n,mønster

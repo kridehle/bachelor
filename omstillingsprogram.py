@@ -4,9 +4,9 @@ import mattefunksjoner
 def main():
     #Kaller opp en funksjon som leser og separerer variabler fra en fil, variabler.txt
     #Denne funksjonen returnerer en rekke forskjellige variabler som skal benyttes senere.
-    Fs,f,pri,prf,dc,t,pk,n = variablehenting.henter_variabler()
+    Fs,f,pri,prf,dc,t,pk,n,mønster = variablehenting.henter_variabler()
     #Funksjon som legger alle variablene inn i selve matteprogrammet, som står for den faktiske omgjøringen
-    mattefunksjoner.globale_variabler(Fs,f,pri,prf,dc,t,n)
+    mattefunksjoner.globale_variabler(Fs,f,pri,prf,dc,t,n,mønster)
     #Genererer en sinusfunksjon basert på variablene som er hentet fra forrige funksjon 
     
     if pk == "ukodet":

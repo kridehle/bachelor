@@ -1,10 +1,11 @@
 I dette tekstdokumentet skal det være  mulig å legge inn alt av variabler
 Man kan skrive hva man vil, porgrammet vil ikke hente inn informasjon som ikke er relevant
 
-
+pattern = jitter
 pk = barker
-t = 0.4
-dc = 0.5
-f = 75
+t = 0.35
+dc = 0.3
+f = 53
 pri = 0.1
-n = 13
+n = 7
+fs = 200000
