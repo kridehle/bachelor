@@ -239,7 +239,7 @@ def barker_bølge():
 #Funksjon som plotter resultatet
 def plott_resultat(final_wave):
     # Plot the result
-    plt.style.use('dark_background')
+
     plt.figure(figsize=(10, 4))
     plt.plot(t, final_wave, label=f"(f={f} Hz, fs={fs:.1f} Hz)")
     

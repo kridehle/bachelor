@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Parametere for firkantpulsen
-fs = 1000  # Samplingsfrekvens (Hz)
+fs = 20000  # Samplingsfrekvens (Hz)
 f = 5      # Firkantpulsens frekvens (Hz)
 dc = 0.2   # Duty cycle (andel tid signalet er "på")
 T = 1      # Total varighet (sekunder)
