@@ -3,10 +3,11 @@ Man kan skrive hva man vil, porgrammet vil ikke hente inn informasjon som ikke e
 
 
 PRI = 0.04
-f = 10
-fs = 10000
+f = 20
+fs = 100000
 dc = 0.3
 t = 0.2
 pattern = jitter
-pk = chirp
+pk = barker
+n = 7
 

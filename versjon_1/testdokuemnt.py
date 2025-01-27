@@ -1,24 +1,39 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
-# Generer et tilfeldig signal
-fs = 1000  # Samplingsfrekvens (Hz)
-t = np.linspace(0, 1, fs, endpoint=False)  # Tidsakse
-signal = np.sin(t*2*np.pi) + np.cos (t*2*np.pi)  # Tilfeldig signal
+# Parametere for firkantpulsen
+fs = 20000  # Samplingsfrekvens (Hz)
+f = 5      # Firkantpulsens frekvens (Hz)
+dc = 0.2   # Duty cycle (andel tid signalet er "på")
+T = 1      # Total varighet (sekunder)
+jitter_percent = 0.2  # Jitter som prosentandel av perioden (10%)
 
-# Bærebølgen
-carrier_freq = 50  # Bærebølgefrekvens (Hz)
-I_carrier = np.cos(2 * np.pi *  t)  # In-phase bærebølge
-Q_carrier = np.sin(2 * np.pi *  t)  # Quadrature bærebølge
+# Beregn perioden og pulsbredden
+periode = 1 / f
+puls_bredde = dc * periode
 
-# Demoduler for å finne I og Q
-I = signal * I_carrier  # I-komponenten
-Q = signal * Q_carrier  # Q-komponenten
+# Generer tidsvektor
+t = np.linspace(0, T, int(fs * T), endpoint=False)
 
-# Kombiner I og Q til ett datasett
-IQ_data = np.column_stack((I, Q)).astype(np.float32)  # 32-bit floats
+# Start- og sluttidspunkter for hver puls med jitter
+start_tider = np.arange(0, T, periode)
+jitter = np.random.uniform(-jitter_percent * periode, jitter_percent * periode, size=len(start_tider))
+start_tider_jittered = start_tider + jitter
 
-# Lagre til en .bin-fil
-filename = "iq_data_no_filter.bin"
-IQ_data.tofile(filename)
+# Generer firkantpuls
+firkantpuls = np.zeros_like(t)
+for start_tid in start_tider_jittered:
+    start_idx = int(start_tid * fs)
+    slutt_idx = int((start_tid + puls_bredde) * fs)
+    if start_idx < len(t):
+        firkantpuls[start_idx:slutt_idx] = 1
 
-print(f"I/Q-data lagret til {filename}")
+# Plot firkantpulsen
+plt.figure(figsize=(10, 4))
+plt.plot(t, firkantpuls, label=f"Frekvens: {f} Hz, Duty cycle: {dc*100}% med jitter")
+plt.title("Firkantpuls med Jitter og Konstant Pulsbredde")
+plt.xlabel("Tid (s)")
+plt.ylabel("Amplitude")
+plt.grid(True)
+plt.legend()
+plt.show()
