@@ -1,5 +1,5 @@
-# bachelor
-Programmering bachelor Kristoffer Dehle
+# Bachelorprogram
+Programmering til bachelor Kristoffer Dehle
 
 ## Viktig info
 
