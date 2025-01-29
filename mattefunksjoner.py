@@ -30,12 +30,15 @@ def globale_variabler(Fs,F,Pri,Prf,Dc,T,N,mønster,R):
             print(f"PRI/PRF ikke angtt. Setter PRF = {f/10}")
             prf = f / 10
             f_firkant = prf
+            pri = 1 / prf
         elif prf != 0 and pri == 0:
             # Hvis PRF er angitt, og ikke PRI
             f_firkant = prf
+            pri = 1 / prf
         elif pri != 0:
             # Hvis PRI er angitt, og ikke PRF
             f_firkant = 1 / pri
+            prf = 1 / pri
         else:
             raise ValueError("Unexpected values for PRF and PRI.")
     except ZeroDivisionError:
@@ -74,6 +77,10 @@ def globale_variabler(Fs,F,Pri,Prf,Dc,T,N,mønster,R):
     # Mønster til PRI enkoding
     global m 
     m = mønster
+
+    # Hvile før start
+    global hvile_før_start
+    hvile_før_start = pri * 0.9
     
 
 #Funksjon som lager en helt standard sinusbølge
@@ -97,12 +104,12 @@ def sinus_bølge():
 
     return sinus_bølge
 
-#Funksjon som genererer en firkantpuls. Frekvens og duty cycle defineres av variablene i inputen. Hvis ingen 
-#ønskede verdier er gitt, settes det forhåndsdefinerte verdier.
+# Funksjon som genererer en firkantpuls. Frekvens og duty cycle defineres av variablene i inputen. Hvis ingen 
+# ønskede verdier er gitt, settes det forhåndsdefinerte verdier.
 def firkantpuls():  
     if m == 'jitter':
-            # Beregn perioden og pulsbredden
-        jitter_prosent = 0.2    
+        # Beregn perioden og pulsbredden
+        jitter_prosent = 0.1    
         
         periode = 1 / f_firkant
         puls_bredde = dc * periode
@@ -122,9 +129,14 @@ def firkantpuls():
             slutt_idx = int((start_tid + puls_bredde) * fs)
             if start_idx < len(t_lokal):
                 firkantpuls[start_idx:slutt_idx] = 1
-    else:
-        firkantpuls = (square(2 * np.pi * f_firkant * t, duty=dc)+1)/2
 
+        # Sett firkantpulsen til 0 frem til hviletiden
+        firkantpuls[t_lokal < hvile_før_start] = 0
+
+    else:
+        t = np.linspace(0, t_tot, int(fs * t_tot), endpoint=False)
+        firkantpuls = (square(2 * np.pi * f_firkant * t, duty=dc) + 1) / 2
+        firkantpuls[t < hvile_før_start] = 0
 
     return firkantpuls
 
