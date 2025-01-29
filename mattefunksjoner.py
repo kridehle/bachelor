@@ -27,8 +27,8 @@ def globale_variabler(Fs,F,Pri,Prf,Dc,T,N,mønster,R):
         # Dette er for at en bruker skal kunne bruke PRI eller PRF avhengig av hva de 
         # liker best
         if prf == 0 and pri == 0:
-            print(f"PRI/PRF ikke angtt. Setter PRF = {f} / 100")
-            prf = f / 100
+            print(f"PRI/PRF ikke angtt. Setter PRF = {f/10}")
+            prf = f / 10
             f_firkant = prf
         elif prf != 0 and pri == 0:
             # Hvis PRF er angitt, og ikke PRI
@@ -44,7 +44,7 @@ def globale_variabler(Fs,F,Pri,Prf,Dc,T,N,mønster,R):
         print(f"An error occurred: {e}")
     #setter global duty cycle
     global dc 
-    dc = Dc
+    dc = float(Dc)
     #Setter pulsbreddetid. Denne skal brukes til blant annet chirp
     #Perioden til et firkantsignal er angitt av 1/f. Ganger man det med dutycycle
     #Vil man få varigheten til en enkelt puls

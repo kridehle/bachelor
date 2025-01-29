@@ -3,4 +3,4 @@
 # Ønsker du å legge inn kommentarer bare skriv inn en # foran det du ønsker å kommentere
 # Kommenterer ut resten av linjen
 
-f 10 fs 80000 
+f 10 fs 80000 pk chirp dc 0.1

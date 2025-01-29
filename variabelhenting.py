@@ -13,13 +13,11 @@ def behandle_input(input_str):
     for i in range(0, len(data), 2):
         nøkkel = data[i]  # For eksempel 'a'
         verdi = data[i + 1]  # For eksempel '5'
-
         # Prøver å konvertere verdien til et heltall, hvis det feiler beholder vi den som en streng
         try:
-            verdi = int(verdi)  # Forsøk å konvertere til heltall
+            verdi = float(verdi)  # Forsøk å konvertere til heltall
         except ValueError:
             pass  # Hvis konverteringen feiler, behold verdien som en streng
-
         variabler[nøkkel] = verdi  # Legger til i dictionary
 
     return variabler
@@ -36,13 +34,11 @@ def henter_variabler():
     
     Fs = variabler.get('fs',0) #henter ut verdi Fs
     if Fs == 0:
-        a = 40
-        Fs = a * f
-        print(f"Samplingsfrekvens ikke angitt. Settes til {a * f}Hz")
+        Skalar = 40
+        Fs = Skalar * f
+        print(f"Samplingsfrekvens ikke angitt. Settes til {Skalar * f}Hz")
     else:
         print(f"Samplingsfrekvens angitt er {Fs}Hz")
-    
-    s = variabler.get('s') #henter ut verdi s
     
     pri = variabler.get('pri',0)
     if pri == 0:
