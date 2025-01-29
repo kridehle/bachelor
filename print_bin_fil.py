@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import variablehenting
+import variabelhenting
 
 global Fs
-Fs,f,pri,prf,dc,t,pk,n,mønster = variablehenting.henter_variabler()
+Fs,f,pri,prf,dc,t,pk,n,mønster = variabelhenting.henter_variabler()
 
 
 # Filnavnet til binærfilen

@@ -7,7 +7,5 @@ f = 20
 fs = 100000
 dc = 0.3
 t = 0.2
-pattern = jitter
 pk = barker
-n = 7
-
+n = 11

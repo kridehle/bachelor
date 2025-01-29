@@ -15,7 +15,7 @@ def separerer_variabler():#henter ut filer fra conten, og lager en ordliste
 
         linje = linje.split("#", 1)[0].strip()#kommentarer markeres av en #. Alt etter # ignoreres
 
-        if not linje: #sparer prosessorkraft med å ikke prsessere tomme linjer
+        if not linje: #sparer prosessorkraft med å ikke prosessere tomme linjer
             continue
 
         linje = linje.strip() #fjerner mellomrom
@@ -83,7 +83,6 @@ def henter_variabler():
     else:
         print(f"Pulskoding angitt er {pk}")
         
-
     n = variabler.get('n',0)
     if n == 0:
         n = 2
