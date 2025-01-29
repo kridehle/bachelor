@@ -2,9 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import square
 from scipy.signal import chirp
-import random
 
-def globale_variabler(Fs,F,Pri,Prf,Dc,T,N,mønster):
+def globale_variabler(Fs,F,Pri,Prf,Dc,T,N,mønster,R):
     #setter global samplingsfrekvens
     global fs
     fs = Fs
@@ -43,18 +42,23 @@ def globale_variabler(Fs,F,Pri,Prf,Dc,T,N,mønster):
         print("Error: PRI cannot be zero when calculating frequency.")
     except Exception as e:
         print(f"An error occurred: {e}")
-        
     #setter global duty cycle
     global dc 
     dc = Dc
-    
     #Setter pulsbreddetid. Denne skal brukes til blant annet chirp
     #Perioden til et firkantsignal er angitt av 1/f. Ganger man det med dutycycle
     #Vil man få varigheten til en enkelt puls
     global pwt
     pwt = (1/f_firkant)*dc 
     print(f"Pw er {pwt}")
-    
+    #Antall ganger en puls skal repeteres, dersom det er ønskelig
+    global r 
+    r = R
+    #Hvis r ikke er 0, og dermed er angitt, settes makstiden basert på antall repetisjoner og pri.
+    #Det plusses på en pri, for at en syklus skal få lov til å fullføres
+    if r != 0:
+        T = (pri * r) + pri
+
     #Definerer felles tidsvektor
     global t
     t = np.arange(0, T, 1 / fs)
@@ -62,21 +66,15 @@ def globale_variabler(Fs,F,Pri,Prf,Dc,T,N,mønster):
     #Definerer varighet
     global t_tot 
     t_tot = T
-    
-    
+
+    #Sekvens til bakrer sekvens
     global n 
     n = N
     
+    # Mønster til PRI enkoding
     global m 
     m = mønster
     
-# #Funksjon som lager en helt standard sinusbølge
-# def sinus_bølge():
-#     # Genererer sinusbølge
-#     sinus_bølge = np.sin(2 * np.pi * f * t)
-#     #Returnerer den genererte sinusbølgen
-#     modulert_bølge = sinus_bølge * firkantpuls()
-#     return modulert_bølge
 
 #Funksjon som lager en helt standard sinusbølge
 def sinus_bølge():
@@ -206,43 +204,14 @@ def barker_bølge():
 
     return barker_bølge
 
-# # Funksjon som genererer et barker kodet signal
-# def barker_bølge():
-#     barker_sekvens = barker_kode(n)  # Hent Barker-koden og lagrer en variant av den
-#     firkant_bølge = firkantpuls()  # Hent firkantpulsen for å styre aktivering
-#     barker_varighet = pwt  # Varigheten til en Barker-sekvens er lik en pulsbredde
-#                            # Samme tankegang som med Chirp
-                           
-#     # Initier Barker-signalet
-#     barker_bølge = np.zeros_like(t)
 
-#     # Finn starten av hver firkantpuls-syklus. Firkantpulsen starter, eller er "på" når den ikke er 0
-#     syklus_starter = np.where(np.diff((firkant_bølge != 0).astype(int)) == 1)[0] + 1
-
-#     # Iterer over hver syklus og generer Barker-sekvensen
-#     for start in syklus_starter:
-#         slutt = start + int(barker_varighet * fs)
-#         slutt = min(slutt, len(t))  # Sørg for at vi ikke går utenfor tidsaksen
-
-#         # Beregn antall samples per Barker-bit
-#         samples_per_bit = (slutt - start) // n
-
-#         # Generer Barker-sekvens i dette tidsvinduet
-#         for i, bit in enumerate(barker_sekvens):
-#             bit_start = start + i * samples_per_bit
-#             bit_slutt = min(bit_start + samples_per_bit, slutt)
-#             barker_bølge[bit_start:bit_slutt] = bit
-
-#     barker_bølge = barker_bølge * sinus_bølge()
-#     return barker_bølge
 
 #Funksjon som plotter resultatet
 def plott_resultat(final_wave):
     # Plot the result
 
     plt.figure(figsize=(10, 4))
-    plt.plot(t, final_wave, label=f"(f={f} Hz, fs={fs:.1f} Hz)")
-    
+    plt.plot(t, final_wave, label=f"(f={f} Hz, fs={fs:.1f} Hz)",color = 'b')
     plt.title("Visuell plot")
     plt.xlabel("Tid (s)")
     plt.ylabel("Amplitude")

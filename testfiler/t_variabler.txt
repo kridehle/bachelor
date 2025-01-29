@@ -1,0 +1,2 @@
+f 10 fs 100 pk chirp #noen variabler
+f 10

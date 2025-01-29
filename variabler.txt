@@ -1,11 +1,6 @@
-I dette tekstdokumentet skal det være  mulig å legge inn alt av variabler
-Man kan skrive hva man vil, porgrammet vil ikke hente inn informasjon som ikke er relevant
+# Her kan man legge inn variabler for å definere bølger. 
+# For å gjøre det riktig, sett inn {parameterdeskriptor} {verdi} {parameterdeskriptor} {verdi} {...} {...}
+# Ønsker du å legge inn kommentarer bare skriv inn en # foran det du ønsker å kommentere
+# Kommenterer ut resten av linjen
 
-
-PRI = 0.04
-f = 20
-fs = 100000
-dc = 0.3
-t = 0.2
-pk = barker
-n = 11
+f 10 fs 80000 
