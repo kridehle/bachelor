@@ -3,4 +3,5 @@
 # Ønsker du å legge inn kommentarer bare skriv inn en # foran det du ønsker å kommentere
 # Kommenterer ut resten av linjen
 
-f 100 fs 80000 pk barker n 7 dc 0.2 r 5 pri 0.05 pattern jitter# En bølgeform som bare tester programemt
+f 100  r 3 fs 4000000 dc 0.2 pattern jitter n 5
+pk chirp

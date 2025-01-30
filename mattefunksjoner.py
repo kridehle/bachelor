@@ -3,106 +3,63 @@ import matplotlib.pyplot as plt
 from scipy.signal import square
 from scipy.signal import chirp
 
-def globale_variabler(Fs,F,Pri,Prf,Dc,T,N,mønster,R):
-    #setter global samplingsfrekvens
-    global fs
-    fs = Fs
-    #setter global signalfrekvens
-    global f
-    f = F
-    #setter global pri
-    global pri
-    pri = Pri
-    #setter global prf
-    global prf 
-    prf = Prf
-    #Setter global firkantpulsfrekvens. Den defineres av PRI/PRF
-    global f_firkant
-    try:
-        # Validere at prf og pri er floats
-        prf = float(prf) if prf is not None else 0
-        pri = float(pri) if pri is not None else 0
-        # Hvis ingen av variablene er satt, settes frekvensen på fikrantpulsen via
-        # Frekvensen dividert på 100
-        # Dette er for at en bruker skal kunne bruke PRI eller PRF avhengig av hva de 
-        # liker best
-        if prf == 0 and pri == 0:
-            print(f"PRI/PRF ikke angtt. Setter PRF = {f/10}")
-            prf = f / 10
-            f_firkant = prf
+
+"""Globale varibler er: fs: samplingsfrekvens f: signalfrekvens pri: pulse_repetition_interval prf: pulse_repetition_frequency dc: duty_cycle t: tid/varighet n: sekvens_til_barker m: pri_mønster r: repetisjoenr"""
+def globale_variabler(fs_i, f_i, pri_i, prf_i, dc_i, t_i, n_i, m_i, r_i):
+    global fs, f, pri, prf, dc, t, n, m, r, f_firkant, pwt, t_tot, hvile_før_start
+    fs, f, pri, prf, dc, t, n, m, r = fs_i, f_i, pri_i, prf_i, dc_i, t_i, n_i, m_i, r_i
+    
+    if pri == 0 and prf == 0:
+        pri = (1/f) * 10
+        print(f"PRI/PRF ikke angitt. PRI settes til {pri}")
+
+    # Hvis pri ikke er angitt, får pri verdien til prf
+    if pri == 0:
+        try:
             pri = 1 / prf
-        elif prf != 0 and pri == 0:
-            # Hvis PRF er angitt, og ikke PRI
-            f_firkant = prf
-            pri = 1 / prf
-        elif pri != 0:
-            # Hvis PRI er angitt, og ikke PRF
-            f_firkant = 1 / pri
-            prf = 1 / pri
-        else:
-            raise ValueError("Unexpected values for PRF and PRI.")
-    except ZeroDivisionError:
-        print("Error: PRI cannot be zero when calculating frequency.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    #setter global duty cycle
-    global dc 
-    dc = float(Dc)
-    #Setter pulsbreddetid. Denne skal brukes til blant annet chirp
-    #Perioden til et firkantsignal er angitt av 1/f. Ganger man det med dutycycle
-    #Vil man få varigheten til en enkelt puls
-    global pwt
-    pwt = (1/f_firkant)*dc 
-    print(f"Pw er {pwt}")
-    #Antall ganger en puls skal repeteres, dersom det er ønskelig
-    global r 
-    r = R
-    #Hvis r ikke er 0, og dermed er angitt, settes makstiden basert på antall repetisjoner og pri.
-    #Det plusses på en pri, for at en syklus skal få lov til å fullføres
+        except ZeroDivisionError:
+            print(f"prf kan ikke være {prf}")
+            
+    # Definerer tiden for en firkantpuls
+    f_firkant = 1 / pri
+    # Definerer tiden det tar for en pulsbredde og printer den
+    pwt = pri * dc
+    print(f"Puls bredde tid er {pwt}")
+    
+    # Hvis det er satt et antall repetisjoner, defineres tiden av pri og antall repetisjoner
     if r != 0:
-        T = (pri * r) + pri
-
-    #Definerer felles tidsvektor
-    global t
-    t = np.arange(0, T, 1 / fs)
+        t_i = (pri * r) + pri
     
-    #Definerer varighet
-    global t_tot 
-    t_tot = T
+    # Definerer en total tid, basert på inputtid. Inputtiden er enten definert av variabler, eller av pri og antall repetisjoner. 
+    t_tot = t_i
+    # Definerer en felles tidsvektor
+    t = np.arange(0, t_i, 1 / fs)
+    # Definerer en hvile før start tid, slik at det ikke skal komme for mange jitter signal
+    hvile_før_start = pri * 0.5
 
-    #Sekvens til bakrer sekvens
-    global n 
-    n = N
-    
-    # Mønster til PRI enkoding
-    global m 
-    m = mønster
 
-    # Hvile før start
-    global hvile_før_start
-    hvile_før_start = pri * 0.9
-    
 
-#Funksjon som lager en helt standard sinusbølge
 def sinus_bølge():
     firkant_bølge = firkantpuls()  # Hent firkantpulsen for å styre aktivering
     sinus_varighet = pwt  # Varigheten er det samme som tiden til en pulsbredde
-    
+
     # Initier sinusbølgen
     sinus_bølge = np.zeros_like(t)
 
-    # Finn starten av hver firkantpuls-syklus
+    # Finn starten av hver firkantpuls-syklus (de tidene hvor firkantbølgen går fra 0 til 1)
     syklus_starter = np.where(np.diff((firkant_bølge != 0).astype(int)) == 1)[0] + 1
 
     # Iterer over hver syklus og generer sinus som starter på nytt
     for start in syklus_starter:
         slutt = start + int(sinus_varighet * fs)
         slutt = min(slutt, len(t))  # Sørg for at vi ikke går utenfor tidsaksen
+
         # Beregn tidsvinduet for sinus innenfor denne syklusen
-        lokal_t = t[:slutt - start] - t[start]
+        lokal_t = t[start:slutt] - t[start]  # Juster for å starte på 0
         sinus_bølge[start:slutt] = np.sin(2 * np.pi * f * lokal_t)
 
     return sinus_bølge
+
 
 # Funksjon som genererer en firkantpuls. Frekvens og duty cycle defineres av variablene i inputen. Hvis ingen 
 # ønskede verdier er gitt, settes det forhåndsdefinerte verdier.
@@ -165,6 +122,7 @@ def chirp_bølge():
 
     return ch_bølge
 
+
 # Funksjon som inneholder forskjellige barker sekvenser
 def barker_kode(n):
     barker_sekvens = {
@@ -215,7 +173,6 @@ def barker_bølge():
         barker_bølge[start:slutt] = barker_bølge[start:slutt] * lokal_sinus_bølge
 
     return barker_bølge
-
 
 
 #Funksjon som plotter resultatet

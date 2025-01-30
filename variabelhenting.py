@@ -15,9 +15,12 @@ def behandle_input(input_str):
         verdi = data[i + 1]  # For eksempel '5'
         # Prøver å konvertere verdien til et heltall, hvis det feiler beholder vi den som en streng
         try:
-            verdi = float(verdi)  # Forsøk å konvertere til heltall
+            verdi = int(verdi)  # Forsøk å konvertere til heltall
         except ValueError:
-            pass  # Hvis konverteringen feiler, behold verdien som en streng
+            try:
+                verdi = float(verdi)
+            except:
+                pass  # Hvis konverteringen feiler, behold verdien som en streng
         variabler[nøkkel] = verdi  # Legger til i dictionary
 
     return variabler
