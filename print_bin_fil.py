@@ -7,7 +7,7 @@ global Fs
 Fs,f,pri,prf,dc,t,pk,n,mønster,r = variabelhenting.henter_variabler()
 
 # Filnavnet til binærfilen
-filename = "iq_data_no_filter.bin"  # Bytt til filen din
+filename = "iq_data.bin"  # Bytt til filen din
 
 # Les inn I/Q-data fra filen
 IQ_data = np.fromfile(filename, dtype=np.float32)

@@ -28,7 +28,7 @@ def lag_IQ_data(valgt_bølge, t):
 
 def skriv_IQ_data(IQ_data):
     # Lagre til en .bin-fil
-    filename = "iq_data_no_filter.bin"
+    filename = "iq_data.bin"
     
     IQ_data.tofile(filename)
 
