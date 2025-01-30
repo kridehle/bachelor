@@ -9,51 +9,57 @@ def globale_variabler(fs_i, f_i, pri_i, prf_i, dc_i, t_i, n_i, m_i, r_i):
     global fs, f, pri, prf, dc, t, n, m, r, f_firkant, pwt, t_tot, hvile_før_start
     fs, f, pri, prf, dc, t, n, m, r = fs_i, f_i, pri_i, prf_i, dc_i, t_i, n_i, m_i, r_i
     
+    if pri == 0 and prf == 0:
+        pri = (1/f) * 10
+        print(f"PRI/PRF ikke angitt. PRI settes til {pri}")
 
+    # Hvis pri ikke er angitt, får pri verdien til prf
     if pri == 0:
-        pri = 1 / prf
-    
+        try:
+            pri = 1 / prf
+        except ZeroDivisionError:
+            print(f"prf kan ikke være {prf}")
+            
+    # Definerer tiden for en firkantpuls
     f_firkant = 1 / pri
-
+    # Definerer tiden det tar for en pulsbredde og printer den
     pwt = pri * dc
     print(f"Puls bredde tid er {pwt}")
-
-    if t == 0:
-        t = (pri * r) + pri
-
-    f_firkant = 1 / pri
     
+    # Hvis det er satt et antall repetisjoner, defineres tiden av pri og antall repetisjoner
     if r != 0:
         t_i = (pri * r) + pri
     
+    # Definerer en total tid, basert på inputtid. Inputtiden er enten definert av variabler, eller av pri og antall repetisjoner. 
     t_tot = t_i
-
+    # Definerer en felles tidsvektor
     t = np.arange(0, t_i, 1 / fs)
-
+    # Definerer en hvile før start tid, slik at det ikke skal komme for mange jitter signal
     hvile_før_start = pri * 0.5
 
-   
 
-#Funksjon som lager en helt standard sinusbølge
+
 def sinus_bølge():
     firkant_bølge = firkantpuls()  # Hent firkantpulsen for å styre aktivering
     sinus_varighet = pwt  # Varigheten er det samme som tiden til en pulsbredde
-    
+
     # Initier sinusbølgen
     sinus_bølge = np.zeros_like(t)
 
-    # Finn starten av hver firkantpuls-syklus
+    # Finn starten av hver firkantpuls-syklus (de tidene hvor firkantbølgen går fra 0 til 1)
     syklus_starter = np.where(np.diff((firkant_bølge != 0).astype(int)) == 1)[0] + 1
 
     # Iterer over hver syklus og generer sinus som starter på nytt
     for start in syklus_starter:
         slutt = start + int(sinus_varighet * fs)
         slutt = min(slutt, len(t))  # Sørg for at vi ikke går utenfor tidsaksen
+
         # Beregn tidsvinduet for sinus innenfor denne syklusen
-        lokal_t = t[:slutt - start] - t[start]
+        lokal_t = t[start:slutt] - t[start]  # Juster for å starte på 0
         sinus_bølge[start:slutt] = np.sin(2 * np.pi * f * lokal_t)
 
     return sinus_bølge
+
 
 # Funksjon som genererer en firkantpuls. Frekvens og duty cycle defineres av variablene i inputen. Hvis ingen 
 # ønskede verdier er gitt, settes det forhåndsdefinerte verdier.
@@ -116,6 +122,7 @@ def chirp_bølge():
 
     return ch_bølge
 
+
 # Funksjon som inneholder forskjellige barker sekvenser
 def barker_kode(n):
     barker_sekvens = {
@@ -166,7 +173,6 @@ def barker_bølge():
         barker_bølge[start:slutt] = barker_bølge[start:slutt] * lokal_sinus_bølge
 
     return barker_bølge
-
 
 
 #Funksjon som plotter resultatet

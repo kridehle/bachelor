@@ -3,4 +3,4 @@
 # Ønsker du å legge inn kommentarer bare skriv inn en # foran det du ønsker å kommentere
 # Kommenterer ut resten av linjen
 
-f 100 pri 0.05 r 5 fs 4000000
+f 100  r 5 fs 4000000 dc 0.2 pattern jitter
