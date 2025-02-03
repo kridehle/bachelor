@@ -6,9 +6,13 @@ from scipy.signal import chirp
 
 """Globale varibler er: fs: samplingsfrekvens f: signalfrekvens pri: pulse_repetition_interval prf: pulse_repetition_frequency dc: duty_cycle t: tid/varighet n: sekvens_til_barker m: pri_mønster r: repetisjoenr"""
 def globale_variabler(fs_i, f_i, pri_i, prf_i, dc_i, t_i, n_i, m_i, r_i):
+    # Definerer globale variabler som kommer til å bli brukt gjennom hele programmet
     global fs, f, pri, prf, dc, t, n, m, r, f_firkant, pwt, t_tot, hvile_før_start
-    fs, f, pri, prf, dc, t, n, m, r = fs_i, f_i, pri_i, prf_i, dc_i, t_i, n_i, m_i, r_i
     
+    # Tildeler de globale variablene verdier definert av brukeren eller forhåndsdefinerte
+    fs, f, pri, prf, dc, t, n, m, r = fs_i, f_i, pri_i, prf_i, dc_i, t_i, n_i, m_i, r_i
+   
+    # Hvis hverken PRI/PRF er definert, tildeles PRI en verdi fra frekvensen til signalet.
     if pri == 0 and prf == 0:
         pri = (1/f) * 10
         print(f"PRI/PRF ikke angitt. PRI settes til {pri}")
@@ -38,7 +42,7 @@ def globale_variabler(fs_i, f_i, pri_i, prf_i, dc_i, t_i, n_i, m_i, r_i):
     hvile_før_start = pri * 0.5
 
 
-
+# Funksjon som lager en sinusbølge. Sinusbølgen følger firkantpulsen. For at dette sakl fungere under jitter/stagger er denne funksjonen litt komplisert
 def sinus_bølge():
     firkant_bølge = firkantpuls()  # Hent firkantpulsen for å styre aktivering
     sinus_varighet = pwt  # Varigheten er det samme som tiden til en pulsbredde
