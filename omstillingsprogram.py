@@ -1,6 +1,7 @@
 import variabelhenting
 import mattefunksjoner
 import numpy as np
+import sys
 
 
 # Funksjon som ser hvilken bølgemodulasjon som er valgt. Dersom det ikke er angitt en bølgemodulasjon settes den til en standard sinusbølge
@@ -29,7 +30,23 @@ def lag_IQ_data(valgt_bølge, t):
     Q = valgt_bølge * Q_carrier  # Q-komponenten
 
     # Kombiner I og Q til ett datasett
-    IQ_data = np.column_stack((I, Q)).astype(np.float16)  # 32-bit floats
+    # Spør brukeren om vedkommende ønker int eller float.
+    try:
+        int_float = input('\n\nVelg om du vil ha IQ data som float eller int.\nFloat32/int16\nSkirv "f" for float eller "i" for int: ')
+        if int_float not in ["f","i"]:
+            raise ValueError("Ugyldig input. Programmet avsluttes")
+    except ValueError as err:
+        print(err)
+        sys.exit()
+    
+    # Initierer variablen
+    int_float = '' 
+    # Lager IQ data som float eller int. For int så må verdiene multipliseres for at de ikke skal bli satt til null
+    if int_float == 'f':
+        IQ_data = np.column_stack((I, Q)).astype(np.float32)  # 32-bit floats
+    else:
+        IQ_data = (np.column_stack((I, Q)) * 32767).astype(np.int16)  # Skaler fra [-1, 1] til [-32768, 32767]
+
     return IQ_data
 
 def skriv_IQ_data(IQ_data):

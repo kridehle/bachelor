@@ -3,3 +3,5 @@
 # Ønsker du å legge inn kommentarer bare skriv inn en # foran det du ønsker å kommentere
 # Kommenterer ut resten av linjen
 
+
+f 10 pri 0.5 t 1 fs 400000 dc 0.5 pk chirp
