@@ -94,7 +94,12 @@ def firkantpuls():
         # Sett firkantpulsen til 0 frem til hviletiden
         firkantpuls[t_lokal < hvile_før_start] = 0
 
+    elif m == 'stagger':
+        # Firkantpulsen må lagres som et array
+        print(f"Stagger valgt, ikke implementert enda")
+
     else:
+        # Genererer firkantpuls med et fast mønster, dette er for tilfeller hvor pri er fixed
         t = np.linspace(0, t_tot, int(fs * t_tot), endpoint=False)
         firkantpuls = (square(2 * np.pi * f_firkant * t, duty=dc) + 1) / 2
         firkantpuls[t < hvile_før_start] = 0

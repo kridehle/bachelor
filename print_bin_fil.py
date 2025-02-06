@@ -10,7 +10,7 @@ Fs,f,pri,prf,dc,t,pk,n,mønster,r = variabelhenting.henter_variabler()
 filename = "iq_data.bin"  # Bytt til filen din
 
 # Les inn I/Q-data fra filen
-IQ_data = np.fromfile(filename, dtype=np.float32)
+IQ_data = np.fromfile(filename, dtype=np.float16)
 
 # Split dataen i I- og Q-komponenter
 I = IQ_data[::2]  # Hent I-komponenten (annenhver verdi)

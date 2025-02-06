@@ -2,15 +2,21 @@ import variabelhenting
 import mattefunksjoner
 import numpy as np
 
+
+# Funksjon som ser hvilken bølgemodulasjon som er valgt. Dersom det ikke er angitt en bølgemodulasjon settes den til en standard sinusbølge
 def velg_bølge(pk):
+    # Hvis ukodet puls er valgt, velges ukodet bølgeform
     if pk == "ukodet":
         valgt_bølge = mattefunksjoner.sinus_bølge()
+    # Hvis chirp puls er valgt, velges chirp bølgeform
     elif pk == "chirp":
         valgt_bølge = mattefunksjoner.chirp_bølge()
+    # Hvis barker puls er valgt, velges barker bølgeform    
     elif pk == "barker":
         valgt_bølge = mattefunksjoner.barker_bølge()
+    # Ellers, hvis strengen er skrevet feil, eller ingenting er valgt, velges ukoet bølgeform
     else:
-        print("Pulskoden angitt eksisterer ikke, eller er ikke implementert enda. Settes til vanlig sinusbølge")
+        print("Pulskoden angitt eksisterer ikke, eller er ikke implementert enda. Settes til vanlig ukodet bølge. Du kan velge mellom ukodet, chirp, og barker")
         valgt_bølge = mattefunksjoner.sinus_bølge()
     return valgt_bølge
 
@@ -23,7 +29,7 @@ def lag_IQ_data(valgt_bølge, t):
     Q = valgt_bølge * Q_carrier  # Q-komponenten
 
     # Kombiner I og Q til ett datasett
-    IQ_data = np.column_stack((I, Q)).astype(np.float32)  # 32-bit floats
+    IQ_data = np.column_stack((I, Q)).astype(np.float16)  # 32-bit floats
     return IQ_data
 
 def skriv_IQ_data(IQ_data):

@@ -37,7 +37,7 @@ def henter_variabler():
     
     Fs = variabler.get('fs',0) #henter ut verdi Fs
     if Fs == 0:
-        Skalar = 40
+        Skalar = 100
         Fs = Skalar * f
         print(f"Samplingsfrekvens ikke angitt. Settes til {Skalar * f}Hz")
     else:
