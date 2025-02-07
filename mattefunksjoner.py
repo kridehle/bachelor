@@ -74,7 +74,8 @@ def sinus_bølge():
 
 # Funksjon som genererer en firkantpuls. Frekvens og duty cycle defineres av variablene i inputen. Hvis ingen 
 # ønskede verdier er gitt, settes det forhåndsdefinerte verdier.
-def firkantpuls():  
+def firkantpuls(): 
+    global t
     if m == 'jitter':
         # Beregn perioden og pulsbredden
         jitter_prosent = 0.1    
@@ -100,10 +101,34 @@ def firkantpuls():
 
         # Sett firkantpulsen til 0 frem til hviletiden
         firkantpuls[t_lokal < hvile_før_start] = 0
-
     elif m == 'stagger':
-        # Firkantpulsen må lagres som et array
-        print(f"Stagger valgt, ikke implementert enda")
+        print(f"Stagger valgt, genererer pulsmønster med PRI: {stagger_verdier}")
+        
+        t_lokal = t
+
+        # Konverter PRI-mønsteret til en liste av float-verdier
+        pri_mønster = [float(val) for val in stagger_verdier]
+
+        firkantpuls = np.zeros_like(t_lokal)  # Initier signalet
+
+        start_tid = 0
+        idx = 0  # Indeks for PRI-mønsteret
+        while start_tid < t_tot:
+            pri_nåværende = pri_mønster[idx % len(pri_mønster)]  # Hent PRI fra mønsteret (loop)
+            puls_bredde = pri_nåværende * dc  # Beregn pulsbredden
+
+            start_idx = int(start_tid * fs)  # Startindeks
+            slutt_idx = int((start_tid + puls_bredde) * fs)  # Sluttindeks
+
+            if start_idx < len(t):
+                firkantpuls[start_idx:slutt_idx] = 1  # Sett puls til 1
+
+            start_tid += pri_nåværende  # Neste startpunkt
+            idx += 1  # Gå til neste PRI i mønsteret
+
+        firkantpuls[t < hvile_før_start] = 0  # Sett null før start
+        
+
 
     else:
         # Genererer firkantpuls med et fast mønster, dette er for tilfeller hvor pri er fixed

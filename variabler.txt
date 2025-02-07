@@ -4,4 +4,4 @@
 # Kommenterer ut resten av linjen
 
 
-f 10 pri 0.5 r 2 fs 400000 dc 0.5 pk chirp 
+f 10 pri 0.5 r 6 fs 400000 dc 0.5 pk chirp pattern stagger,0.5,0.6,0.7,0.8
