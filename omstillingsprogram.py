@@ -31,6 +31,10 @@ def lag_IQ_data(valgt_bølge, t):
 
     # Kombiner I og Q til ett datasett
     # Spør brukeren om vedkommende ønker int eller float.
+   
+    # Initierer variablen 
+    int_float = ''
+
     try:
         int_float = input('\n\nVelg om du vil ha IQ data som float eller int.\nFloat32/int16\nSkirv "f" for float eller "i" for int: ')
         if int_float not in ["f","i"]:
@@ -38,9 +42,7 @@ def lag_IQ_data(valgt_bølge, t):
     except ValueError as err:
         print(err)
         sys.exit()
-    
-    # Initierer variablen
-    int_float = '' 
+     
     # Lager IQ data som float eller int. For int så må verdiene multipliseres for at de ikke skal bli satt til null
     if int_float == 'f':
         IQ_data = np.column_stack((I, Q)).astype(np.float32)  # 32-bit floats

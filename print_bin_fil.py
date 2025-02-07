@@ -12,6 +12,9 @@ Fs,f,pri,prf,dc,t,pk,n,mønster,r = variabelhenting.henter_variabler()
 filename = "iq_data.bin"  # Bytt til filen din
 
 # Velg int eller float
+
+int_float = ''
+
 try:
     int_float = input('\n\nVelg om du vil ha IQ data som float eller int.\nFloat32/int16\nSkirv "f" for float eller "i" for int: ')
     if int_float not in ["f","i"]:
@@ -22,11 +25,10 @@ except ValueError as err:
 
 
 # Les inn data fra binær fil og tolk det som float eller int
-if int_float == f:
+if int_float == "f":
     IQ_data = np.fromfile(filename, dtype=np.float32)    
 else: 
-    IQ_data = np.fromfile(filename, dtype=np.int16)
-
+    IQ_data = np.fromfile(filename, dtype=np.int16) / 32767.0  # Normaliserer tilbake til [-1, 1]
 # Split dataen i I- og Q-komponenter
 I = IQ_data[::2]  # Hent I-komponenten (annenhver verdi)
 Q = IQ_data[1::2]  # Hent Q-komponenten (annenhver verdi)

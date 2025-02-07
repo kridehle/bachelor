@@ -4,4 +4,4 @@
 # Kommenterer ut resten av linjen
 
 
-f 10 pri 0.5 t 1 fs 400000 dc 0.5 pk chirp
+f 10 pri 0.5 r 2 fs 400000 dc 0.5 pk chirp 
