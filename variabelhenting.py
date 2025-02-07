@@ -1,3 +1,5 @@
+import sys
+
 def les_fil(filnavn):
     with open(filnavn, 'r') as fil:
         innhold = fil.read().strip()
@@ -37,23 +39,23 @@ def henter_variabler():
     
     Fs = variabler.get('fs',0) #henter ut verdi Fs
     if Fs == 0:
-        Skalar = 100
+        Skalar = 8000
         Fs = Skalar * f
         print(f"Samplingsfrekvens ikke angitt. Settes til {Skalar * f}Hz")
     else:
         print(f"Samplingsfrekvens angitt er {Fs}Hz")
     
     pri = variabler.get('pri',0)
-    if pri == 0:
-        print("PRI ikke angitt.")
-    else:
-        print(f"PRI angitt er {pri}s")
-    
     prf = variabler.get('prf',0)
-    if prf == 0:
-        print("PRF ikke angitt.")
-    else:
+
+    if pri == 0 and prf == 0:
+        pri = (1/f) * 10
+        print(f"PRI og PRF er ikke angitt. PRI settes til {pri}s")
+    elif pri != 0 and prf == 0:
+        print(f"PRI angitt er {pri}s")
+    elif pri == 0 and prf != 0:    
         print(f"PRF angitt er {prf}Hz")
+        pri = 1 / prf     
 
     dc = variabler.get('dc',0)
     if dc == 0:
@@ -69,12 +71,28 @@ def henter_variabler():
     else:
         print(f"Tid angitt er {t}s")
     
-    pk = variabler.get('pk', 'ukodet')    
-    if pk == 'ukodet':
-        print(f"Pulskoding ikke definert, settes til {pk}")
+
+    mønster = variabler.get('mønster', 'nil')    
+
+    deler = mønster.split(',')
+    mønster = deler [0]
+    stagger_verdier = deler[1:]
+    stagger_verdier = list(map(float, stagger_verdier))
+
+
+    if mønster == 'stagger':
+        print(f"Stagger verdier angitt er {stagger_verdier}s")
+
+    if mønster == 'nil':
+        mønster = 'ukodet'
+        print(f"Pulskoding ikke angitt. Pulskoding settes til er {mønster}")
+    elif mønster != 'ukodet' and mønster != 'stagger' and mønster != 'jitter' and mønster != 'dwell-dwell':
+        raise ValueError("Feil pulskode angitt. Benytt deg av en gyldig pulskode eller hold feltet åpent")
+        SystemExit
     else:
-        print(f"Pulskoding angitt er {pk}")
-        
+        print(f"Pulskoding angitt er {mønster}")
+
+
     n = int(variabler.get('n',0))
     if n == 0:
         n = 2
@@ -82,12 +100,15 @@ def henter_variabler():
     else:
         print(f"Sekvens til barker angitt er {n}")
         
-    mønster = variabler.get('pattern',0)
-    if mønster == 0:
-        mønster = 'fixed'
-        print(f"PRI møsnter ikke angitt, settes til {mønster}")
+    pulskode = variabler.get('pk',0)
+    if pulskode == 0:
+        pulskode = 'ukodet'
+        print(f"PRI pulskode ikke angitt, settes til {pulskode}")
+    elif pulskode != 'ukodet' and pulskode != 'chirp' and pulskode != 'barker':
+        raise ValueError("Feil pulskode/modulering angitt. Benytt deg av en gyldig pulskode eller hold feltet åpent")
+        SystemExit
     else:
-        print(f"PRI mønster angitt er {mønster}")
+        print(f"PRI pulskode angitt er {pulskode}")
 
     r = variabler.get('r',0)
     if r == 0:
@@ -95,4 +116,4 @@ def henter_variabler():
     else:
         print(f"Antall repetisjoner angitt er {r}")
 
-    return Fs,f,pri,prf,dc,t,pk,n,mønster,r
+    return Fs,f,pri,dc,t,pulskode,n,mønster,r, stagger_verdier

@@ -1,25 +1,8 @@
 import variabelhenting
 import mattefunksjoner
 import numpy as np
+import matplotlib.pyplot as plt
 import sys
-
-
-# Funksjon som ser hvilken bølgemodulasjon som er valgt. Dersom det ikke er angitt en bølgemodulasjon settes den til en standard sinusbølge
-def velg_bølge(pk):
-    # Hvis ukodet puls er valgt, velges ukodet bølgeform
-    if pk == "ukodet":
-        valgt_bølge = mattefunksjoner.sinus_bølge()
-    # Hvis chirp puls er valgt, velges chirp bølgeform
-    elif pk == "chirp":
-        valgt_bølge = mattefunksjoner.chirp_bølge()
-    # Hvis barker puls er valgt, velges barker bølgeform    
-    elif pk == "barker":
-        valgt_bølge = mattefunksjoner.barker_bølge()
-    # Ellers, hvis strengen er skrevet feil, eller ingenting er valgt, velges ukoet bølgeform
-    else:
-        print("Pulskoden angitt eksisterer ikke, eller er ikke implementert enda. Settes til vanlig ukodet bølge. Du kan velge mellom ukodet, chirp, og barker")
-        valgt_bølge = mattefunksjoner.sinus_bølge()
-    return valgt_bølge
 
 def lag_IQ_data(valgt_bølge, t):
     I_carrier = np.cos(2 * np.pi * t)  # In-phase bærebølge
@@ -59,21 +42,43 @@ def skriv_IQ_data(IQ_data):
 
     print(f"I/Q-data lagret til {filename}")
 
+def finn_total_tid(pulsrepetisjonsintervall, repetisjoner, duty_cycle, stagger_verdier, pri_mønster):
+    if pri_mønster == 'stagger':
+        gjennomsnitt_stagger_verier = (sum(stagger_verdier)) / (len(stagger_verdier))
+        total_tid = sum(stagger_verdier) + gjennomsnitt_stagger_verier * 1.5
+    else:
+        total_tid = (pulsrepetisjonsintervall * repetisjoner) + (pulsrepetisjonsintervall * duty_cycle * 2) # Er bare for at plottet skal se fint ut. Verdien 3 kan helt fint endre, men ikke til mye mer før det kan bli problemer med antall repetisjoner
+    return total_tid
+
+def lag_endelig_bølge(puls_type, firkantpuls, signalfrekvens, samplingsfrekvens, total_tid, duty_cycle, pulsrepetisjonsintervall, n_barker):
+    if puls_type == 'ukodet':
+        endelig_bølge_valg = mattefunksjoner.sinusbølge(firkantpuls, pulsrepetisjonsintervall, duty_cycle, samplingsfrekvens, signalfrekvens, total_tid)
+    elif puls_type == 'chirp':
+        print("CHIRP")
+        endelig_bølge_valg = mattefunksjoner.chirpbølge(firkantpuls, signalfrekvens, samplingsfrekvens, total_tid, duty_cycle, pulsrepetisjonsintervall)
+    else:   
+        print("BARKER")
+        endelig_bølge_valg = mattefunksjoner.barkerbølge(firkantpuls, signalfrekvens, samplingsfrekvens, total_tid, duty_cycle, pulsrepetisjonsintervall, n_barker)
+    return endelig_bølge_valg
+
 def main():
     #Kaller opp en funksjon som leser og separerer variabler fra en fil, variabler.txt
     #Denne funksjonen returnerer en rekke forskjellige variabler som skal benyttes senere.
-    Fs,f,pri,prf,dc,t,pk,n,mønster,r = variabelhenting.henter_variabler()
-    #Funksjon som legger alle variablene inn i selve matteprogrammet, som står for den faktiske omgjøringen
-    mattefunksjoner.globale_variabler(Fs,f,pri,prf,dc,t,n,mønster,r)
-    #Velger pulskoding
-    valgt_bølge = velg_bølge(pk)
-    #Lager IQ data
-    IQ_data = lag_IQ_data(valgt_bølge, t)
+    samplingsfrekvens, signalfrekvens, pulsrepetisjonsintervall, duty_cycle, tid, puls_type, n_barker, pri_mønster, repetisjoner, stagger_verdier = variabelhenting.henter_variabler()
+    
+    #Denne variablen benyttes mye, så defineres en gang har for gjenbruk
+    total_tid = finn_total_tid(pulsrepetisjonsintervall, repetisjoner, duty_cycle, stagger_verdier, pri_mønster)
+    
+    firkantpuls = mattefunksjoner.firkantpuls(pri_mønster, samplingsfrekvens, pulsrepetisjonsintervall, duty_cycle, tid, repetisjoner, total_tid, stagger_verdier)
+
+    endelig_bølge = lag_endelig_bølge(puls_type, firkantpuls, signalfrekvens, samplingsfrekvens, total_tid, duty_cycle, pulsrepetisjonsintervall, n_barker)
+    
+
+    IQ_data = lag_IQ_data(endelig_bølge, total_tid)
     #Lagrer IQ data
     skriv_IQ_data(IQ_data)
     #Plotter bølgen. Dette er for å kunne validere at IQ data filen er korrekt
-    mattefunksjoner.plott_resultat(valgt_bølge)
-
+    mattefunksjoner.plott_resultat(endelig_bølge, samplingsfrekvens, signalfrekvens, total_tid)
 
 if __name__ == "__main__":
     main()

@@ -6,7 +6,7 @@ import sys
 
 #Henter variabler, men bruker egentlig bare Fs. Dette gjøres for å slippe å endre Fs manuelt for hver gang det skal printes
 global Fs
-Fs,f,pri,prf,dc,t,pk,n,mønster,r = variabelhenting.henter_variabler()
+Fs,f,pri,dc,t,pk,n,mønster,r,stagger_verdier = variabelhenting.henter_variabler()
 
 # Filnavnet til binærfilen
 filename = "iq_data.bin"  # Bytt til filen din
