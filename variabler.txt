@@ -1,7 +1,7 @@
 # Her kan man legge inn variabler for å definere bølger. 
-# For å gjøre det riktig, sett inn {parameterdeskriptor} {verdi} {parameterdeskriptor} {verdi} {...} {...}
+# For å gjøre det riktig, sett inn {parameterdeskriptor} {verdi} {parameterdeskriptor} {verdi} ... 
 # Ønsker du å legge inn kommentarer bare skriv inn en # foran det du ønsker å kommentere
-# Kommenterer ut resten av linjen
+# '#' Kommenterer ut resten av linjen
 
 
-f 10 dc 0.4 r 8 pk chirp n 4  fs 8000000 pri 0.1 mønster stagger,0.1,0.2,0.1,0.2,0.3
+f 70 dc 0.4 r 8 pk barker n 4  fs 8000000 pri 0.1 mønster stagger,0.1,0.2,0.1,0.2
