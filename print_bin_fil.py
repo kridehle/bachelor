@@ -6,7 +6,8 @@ import sys
 
 #Henter variabler, men bruker egentlig bare Fs. Dette gjøres for å slippe å endre Fs manuelt for hver gang det skal printes
 global Fs
-Fs,f,pri,dc,t,pk,n,mønster,r,stagger_verdier = variabelhenting.henter_variabler()
+variabler = variabelhenting.henter_variabler()
+Fs = variabler[0].samplingsfrekvens
 
 # Filnavnet til binærfilen
 filename = "iq_data.bin"  # Bytt til filen din
@@ -42,7 +43,7 @@ reconstructed_signal = I + Q
 
 # Plot det rekonstruerte signalet
 plt.figure(figsize=(10, 4))
-plt.plot(t, reconstructed_signal, label=f"(f={f} Hz, fs={Fs:.1f} Hz)",color = 'r')
+plt.plot(t, reconstructed_signal, lcolor = 'r')
 plt.title("Visuell plot")
 plt.xlabel("Tid (s)")
 plt.ylabel("Amplitude")

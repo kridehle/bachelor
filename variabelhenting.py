@@ -1,7 +1,11 @@
 import sys
+import numpy as np
+
+objekter = []
 
 class BølgeVariabler:
-    def __init__(self, signalfrekvens, samplingsfrekvens, pulsrepetisjonsintervall, duty_cycle, tid, puls_type, n_barker, mønster, repetisjoner, stagger_verdier):
+
+    def __init__(self, signalfrekvens, samplingsfrekvens, pulsrepetisjonsintervall, duty_cycle, tid, puls_type, n_barker, mønster, repetisjoner, stagger_verdier, total_tid, firkant_puls, endelig_bølge):
         self.signalfrekvens = signalfrekvens
         self.samplingsfrekvens = samplingsfrekvens
         self.pulsrepetisjonsintervall = pulsrepetisjonsintervall
@@ -12,24 +16,13 @@ class BølgeVariabler:
         self.pri_mønster = mønster
         self.repetisjoner = repetisjoner
         self.stagger_verdier = stagger_verdier
+        self.total_tid = total_tid
+        self.firkant_puls = firkant_puls
+        self.endelig_bølge = endelig_bølge
 
     def verifiser_variabler(self):
-        print(f"Signalfrekvens: {self.signalfrekvens} Hz\nSamplingsfrekvens: {self.samplingsfrekvens} Hz\nPulsrepetisjonsintervall: {self.pulsrepetisjonsintervall} s\nDuty cycle: {self.duty_cycle}\nTid: {self.tid} s\nPuls type: {self.puls_type}\nN til barker: {self.n_barker}\nPulsmønster: {self.pri_mønster}\nRepetisjoner: {self.repetisjoner}\nStagger verdier: {self.stagger_verdier}")
+        print(f"Signalfrekvens: {self.signalfrekvens} Hz\nSamplingsfrekvens: {self.samplingsfrekvens} Hz\nPulsrepetisjonsintervall: {self.pulsrepetisjonsintervall} s\nDuty cycle: {self.duty_cycle}\nTid: {self.tid} s\nPuls type: {self.puls_type}\nBarker sekvens: {self.n_barker}\nPulsmønster: {self.pri_mønster}\nRepetisjoner: {self.repetisjoner}\nStagger verdier: {self.stagger_verdier}\n")
 
-def standard_variabler():
-    signalfrekvens = 1000
-    samplingsfrekvens = 8000 * signalfrekvens
-    pulsrepetisjonsintervall = 0.1
-    duty_cycle = 0.1
-    tid = 1
-    puls_type = 'ukodet'
-    n_barker = 2
-    mønster = 'ukodet'
-    repetisjoner = 2
-    stagger_verdier = 0
-
-    bølge = BølgeVariabler(signalfrekvens, samplingsfrekvens, pulsrepetisjonsintervall, duty_cycle, tid, puls_type, n_barker, mønster, repetisjoner, stagger_verdier)
-    return bølge
 
 def les_fil(filnavn):
     # Åpner en fil og leser linjene
@@ -42,32 +35,62 @@ def les_fil(filnavn):
 
     return linjer
 
+def liste_til_ordbok(input_liste):
+    deler = input_liste.split()
+    if len(deler) % 2 != 0:
+        raise ValueError("Listen må ha et partall antall elementer")
+    
+    variabler = {deler[i]: deler[i + 1] for i in range(0, len(deler), 2)}
+    return variabler
+
+
+
 def henter_variabler():
     input = les_fil('variabler.txt')
-    print(input)
-    print(len(input))
-    objekt = []
 
     for n in range(len(input)):
 
-        lokal_input = input[n].split()
+        lokal_input = liste_til_ordbok(input[n])
 
-        print(lokal_input)
-
-        signalfrekvens = lokal_input.get('f')
-        samplingsfrekvens = lokal_input.get('fs')
-        pulsrepetisjonsintervall = lokal_input.get('pri')
-        duty_cycle = lokal_input.get('dc')
-        tid = lokal_input.get('t')
-        puls_type = lokal_input.get('pt')
-        n_barker = lokal_input.get('n')
-        mønster = lokal_input.get('pm')
-        repetisjoner = lokal_input.get('r')
-        stagger_verdier = lokal_input.get('sv')
+        standard_signalfrekvens = 1000
+        
+        standard_pulsrepetisjonsintervall = 0.1
+        standard_duty_cycle = 0.1
+        standard_tid = 1
+        standard_puls_type = 'ukodet'
+        standard_n_barker = 2
+        standard_mønster = 'ukodet'
+        standard_repetisjoner = 2
+        standard_stagger_verdier = 0
 
 
-        objekt[n] = BølgeVariabler(signalfrekvens, samplingsfrekvens, pulsrepetisjonsintervall, duty_cycle, tid, puls_type, n_barker, mønster, repetisjoner, stagger_verdier)
-    return objekt
+        signalfrekvens = float(lokal_input.get('f', standard_signalfrekvens))
 
-o = henter_variabler()
-print (o)
+        standard_samplingsfrekvens = 1000 * signalfrekvens
+
+        samplingsfrekvens = float(lokal_input.get('fs', standard_samplingsfrekvens))
+        pulsrepetisjonsintervall = float(lokal_input.get('pri', standard_pulsrepetisjonsintervall))
+        duty_cycle = float(lokal_input.get('dc', standard_duty_cycle))
+        tid = float(lokal_input.get('t', standard_tid))
+        puls_type = lokal_input.get('pt', standard_puls_type)
+        n_barker = int(lokal_input.get('n', standard_n_barker))
+        mønster = lokal_input.get('pm', standard_mønster)
+        repetisjoner = int(lokal_input.get('r', standard_repetisjoner))
+        
+        
+        deler = mønster.split(',')
+        mønster = deler [0]
+        stagger_verdier = deler[1:]
+        stagger_verdier = list(map(float, stagger_verdier))
+
+        total_tid = np.array([])
+        firkant_puls = np.array([])
+        endelig_bølge = np.array([])
+
+
+        objekter.append(BølgeVariabler(signalfrekvens, samplingsfrekvens,
+                                        pulsrepetisjonsintervall, duty_cycle, tid,
+                                          puls_type, n_barker, mønster, repetisjoner,
+                                            stagger_verdier, total_tid, firkant_puls,
+                                            endelig_bølge))
+    return objekter

@@ -4,6 +4,6 @@
 # '#' Kommenterer ut resten av linjen
 
 
-f 70 dc 0.4 r 8 pk barker n 4  fs 8000000 pri 0.1 mønster stagger,0.1,0.2,0.1,0.2
+f 10 dc 0.4 r 4 fs 80000 pt chirp pm stagger,0.1,0.2,0.3,0.1
 
 f 30 dc 0.4
