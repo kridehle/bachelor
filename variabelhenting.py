@@ -1,119 +1,73 @@
 import sys
 
+class BølgeVariabler:
+    def __init__(self, signalfrekvens, samplingsfrekvens, pulsrepetisjonsintervall, duty_cycle, tid, puls_type, n_barker, mønster, repetisjoner, stagger_verdier):
+        self.signalfrekvens = signalfrekvens
+        self.samplingsfrekvens = samplingsfrekvens
+        self.pulsrepetisjonsintervall = pulsrepetisjonsintervall
+        self.duty_cycle = duty_cycle
+        self.tid = tid
+        self.puls_type = puls_type
+        self.n_barker = n_barker
+        self.pri_mønster = mønster
+        self.repetisjoner = repetisjoner
+        self.stagger_verdier = stagger_verdier
+
+    def verifiser_variabler(self):
+        print(f"Signalfrekvens: {self.signalfrekvens} Hz\nSamplingsfrekvens: {self.samplingsfrekvens} Hz\nPulsrepetisjonsintervall: {self.pulsrepetisjonsintervall} s\nDuty cycle: {self.duty_cycle}\nTid: {self.tid} s\nPuls type: {self.puls_type}\nN til barker: {self.n_barker}\nPulsmønster: {self.pri_mønster}\nRepetisjoner: {self.repetisjoner}\nStagger verdier: {self.stagger_verdier}")
+
+def standard_variabler():
+    signalfrekvens = 1000
+    samplingsfrekvens = 8000 * signalfrekvens
+    pulsrepetisjonsintervall = 0.1
+    duty_cycle = 0.1
+    tid = 1
+    puls_type = 'ukodet'
+    n_barker = 2
+    mønster = 'ukodet'
+    repetisjoner = 2
+    stagger_verdier = 0
+
+    bølge = BølgeVariabler(signalfrekvens, samplingsfrekvens, pulsrepetisjonsintervall, duty_cycle, tid, puls_type, n_barker, mønster, repetisjoner, stagger_verdier)
+    return bølge
+
 def les_fil(filnavn):
-    with open(filnavn, 'r') as fil:
-        innhold = fil.read().strip()
-        # Fjerner kommentarer etter #
-        innhold = '\n'.join([linje.split('#', 1)[0].strip() for linje in innhold.splitlines()])
-        return innhold
-
-def behandle_input(input_str):
-    data = input_str.split()  # Deler inputen på mellomrom
-    variabler = {}
-
-    # Går gjennom inputen to og to elementer
-    for i in range(0, len(data), 2):
-        nøkkel = data[i]  # For eksempel 'a'
-        verdi = data[i + 1]  # For eksempel '5'
-        # Prøver å konvertere verdien til et heltall, hvis det feiler beholder vi den som en streng
-        try:
-            verdi = int(verdi)  # Forsøk å konvertere til heltall
-        except ValueError:
-            try:
-                verdi = float(verdi)
-            except:
-                pass  # Hvis konverteringen feiler, behold verdien som en streng
-        variabler[nøkkel] = verdi  # Legger til i dictionary
-
-    return variabler
+    # Åpner en fil og leser linjene
+    data = '' # Initierer en tom streng
+    with open(filnavn, "r", encoding="utf-8") as fil:
+        data = fil.read()
+        data = '\n'.join([linje.split('#', 1)[0].strip() for linje in data.splitlines()])
     
+    linjer = [linje.strip() for linje in data.split("\n") if linje.strip()]
+
+    return linjer
+
 def henter_variabler():
     input = les_fil('variabler.txt')
-    variabler=behandle_input(input)#henter ut en ordbok
-    f = variabler.get('f',0) #henter uf verdi f, setter til 0 dersom ikke valgt
-    if f == 0:
-        f = 1e3
-        print(f"Frekvens ikke angitt. Settes til {f}Hz")
-    else:
-        print(f"Frekvens angitt er {f}Hz")
-    
-    Fs = variabler.get('fs',0) #henter ut verdi Fs
-    if Fs == 0:
-        Skalar = 8000
-        Fs = Skalar * f
-        print(f"Samplingsfrekvens ikke angitt. Settes til {Skalar * f}Hz")
-    else:
-        print(f"Samplingsfrekvens angitt er {Fs}Hz")
-    
-    pri = variabler.get('pri',0)
-    prf = variabler.get('prf',0)
+    print(input)
+    print(len(input))
+    objekt = []
 
-    if pri == 0 and prf == 0:
-        pri = (1/f) * 10
-        print(f"PRI og PRF er ikke angitt. PRI settes til {pri}s")
-    elif pri != 0 and prf == 0:
-        print(f"PRI angitt er {pri}s")
-    elif pri == 0 and prf != 0:    
-        print(f"PRF angitt er {prf}Hz")
-        pri = 1 / prf     
+    for n in range(len(input)):
 
-    dc = variabler.get('dc',0)
-    if dc == 0:
-        dc = 0.1
-        print(f"Dutycycle ikke angitt. Setts til {dc}")
-    else:
-        print(f"Dutycycle angitt er {dc}")
-    
-    t = variabler.get('t',0)
-    if t == 0:
-        t = 0.1
-        print(f"Tid ikke angitt. Settes til {t}s")  
-    else:
-        print(f"Tid angitt er {t}s")
-    
+        lokal_input = input[n].split()
 
-    mønster = variabler.get('mønster', 'nil')    
+        print(lokal_input)
 
-    deler = mønster.split(',')
-    mønster = deler [0]
-    stagger_verdier = deler[1:]
-    stagger_verdier = list(map(float, stagger_verdier))
+        signalfrekvens = lokal_input.get('f')
+        samplingsfrekvens = lokal_input.get('fs')
+        pulsrepetisjonsintervall = lokal_input.get('pri')
+        duty_cycle = lokal_input.get('dc')
+        tid = lokal_input.get('t')
+        puls_type = lokal_input.get('pt')
+        n_barker = lokal_input.get('n')
+        mønster = lokal_input.get('pm')
+        repetisjoner = lokal_input.get('r')
+        stagger_verdier = lokal_input.get('sv')
 
 
-    if mønster == 'stagger':
-        print(f"Stagger verdier angitt er {stagger_verdier}s")
+        objekt[n] = BølgeVariabler(signalfrekvens, samplingsfrekvens, pulsrepetisjonsintervall, duty_cycle, tid, puls_type, n_barker, mønster, repetisjoner, stagger_verdier)
+    return objekt
 
-    if mønster == 'nil':
-        mønster = 'ukodet'
-        print(f"Pulskoding ikke angitt. Pulskoding settes til er {mønster}")
-    elif mønster != 'ukodet' and mønster != 'stagger' and mønster != 'jitter' and mønster != 'dwell-dwell':
-        raise ValueError("Feil pulskode angitt. Benytt deg av en gyldig pulskode eller hold feltet åpent")
-        SystemExit
-    else:
-        print(f"Pulskoding angitt er {mønster}")
-
-
-    n = int(variabler.get('n',0))
-    if n == 0:
-        n = 2
-        print(f"Sekvens til barker ikke angitt. Verdien settes til {n}")
-    else:
-        print(f"Sekvens til barker angitt er {n}")
-        
-    pulskode = variabler.get('pk',0)
-    if pulskode == 0:
-        pulskode = 'ukodet'
-        print(f"PRI pulskode ikke angitt, settes til {pulskode}")
-    elif pulskode != 'ukodet' and pulskode != 'chirp' and pulskode != 'barker':
-        raise ValueError("Feil pulskode/modulering angitt. Benytt deg av en gyldig pulskode eller hold feltet åpent")
-        SystemExit
-    else:
-        print(f"PRI pulskode angitt er {pulskode}")
-
-    r = variabler.get('r',0)
-    if r == 0:
-        print("Antall repetisjoner ikke angitt")
-    else:
-        print(f"Antall repetisjoner angitt er {r}")
-
-    return Fs,f,pri,dc,t,pulskode,n,mønster,r, stagger_verdier
+o = henter_variabler()
+print (o)
