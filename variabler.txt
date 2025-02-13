@@ -3,7 +3,10 @@
 # Ønsker du å legge inn kommentarer bare skriv inn en # foran det du ønsker å kommentere
 # '#' Kommenterer ut resten av linjen
 
+# Bølge 1
+f 70 dc 0.4 fs 80000 pm jitter r 10
 
-f 10 dc 0.4 r 4 fs 80000 pt chirp pm stagger,0.1,0.2,0.3,0.1
 
-f 30 dc 0.4
+# Bølge 2
+f 10 dc 0.4 fs 80000 pt barker n 4 pm jitter r 6
+

@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
+# Funksjon som henter og verifiserer variabler
 def hent_og_verifiser_variabler():
     teller = 1
     bølge_variabler = variabelhenting.henter_variabler()
@@ -13,16 +14,9 @@ def hent_og_verifiser_variabler():
         teller += 1
     return bølge_variabler
 
-def lag_IQ_data(valgt_bølge):
-    I_carrier = np.cos(2 * np.pi)  # In-phase bærebølge
-    Q_carrier = np.sin(2 * np.pi)  # Quadrature bærebølge
-
-    # Demoduler for å finne I og Q
-    I = valgt_bølge * I_carrier  # I-komponenten
-    Q = valgt_bølge * Q_carrier  # Q-komponenten
-
-    # Kombiner I og Q til ett datasett
-    # Spør brukeren om vedkommende ønker int eller float.
+# Funksjon som velger integer eller float
+def velg_int_eller_float():
+        # Spør brukeren om vedkommende ønker int eller float.
    
     # Initierer variablen 
     int_float = ''
@@ -33,13 +27,36 @@ def lag_IQ_data(valgt_bølge):
         raise ValueError("Ugyldig input. Programmet avsluttes")
         sys.exit()
     
+    return int_float
+
+# Funksjon som lager IQ data basert på valgt bølge
+def lag_IQ_data(bølge_variabler, int_float):
+
+    # Lager en tidsvektor
+    tidsvektor = np.arange(0, bølge_variabler.total_tid, 1 / bølge_variabler.samplingsfrekvens)
+
+    # Lager en bærebølge som definerer I og Q
+    I_carrier = np.cos(2 * np.pi * tidsvektor)  # In-phase bærebølge
+    Q_carrier = np.sin(2 * np.pi * tidsvektor)  # Quadrature bærebølge
+
+    # Fordeler I og Q komponentene på bølgen
+    I = bølge_variabler.endelig_bølge * I_carrier  # I-komponenten
+    Q = bølge_variabler.endelig_bølge * Q_carrier  # Q-komponenten
+
+
+
     # Lager IQ data som float eller int. For int så må verdiene multipliseres for at de ikke skal bli satt til null
     if int_float == 'f':
+        # Kombiner I og Q til ett datasett
         IQ_data = np.column_stack((I, Q)).astype(np.float32)  # 32-bit floats
     else:
+        # Kombiner I og Q til ett datasett
         IQ_data = (np.column_stack((I, Q)) * 32767).astype(np.int16)  # Skaler fra [-1, 1] til [-32768, 32767] (må mulitpliseres med 32767 for å få riktig verdi)
+
+
     return IQ_data
 
+# Funksjon som skriver IQ data til en bin fil
 def skriv_IQ_data(IQ_data):
     # Lagre til en .bin-fil
     filename = "iq_data.bin"
@@ -52,11 +69,10 @@ def skriv_IQ_data(IQ_data):
 def finn_total_tid(bølge_variabler):
     # Hvis stagger benyttes så benyttes sumen av stagger verdiene + en ekstra for å få en fin graf
     if bølge_variabler.pri_mønster == 'stagger':
-        gjennomsnitt_stagger_verier = (sum(bølge_variabler.stagger_verdier)) / (len(bølge_variabler.stagger_verdier))
-        total_tid = sum(bølge_variabler.stagger_verdier) + bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.duty_cycle * 2 # Er bare for at plottet skal se fint ut. Verdien 2 kan helt
+        total_tid = sum(bølge_variabler.stagger_verdier) + bølge_variabler.pulsrepetisjonsintervall #* (1-bølge_variabler.duty_cycle) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt
     # En så lenge får alle andre funksjoner en total tid basert på pri, repetisjoner og duty cycle
     else:
-        total_tid = (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.repetisjoner) + (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.duty_cycle * 2) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt fint endres, men ikke til mye mer før det kan bli problemer med antall repetisjoner
+        total_tid = (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.repetisjoner) + (bølge_variabler.pulsrepetisjonsintervall * (1 - bølge_variabler.duty_cycle)) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt fint endres, men ikke til mye mer før det kan bli problemer med antall repetisjoner
     return total_tid
 
 # Funksjon som lager en bølge basert på valgt puls type
@@ -77,25 +93,38 @@ def main():
     # En funksjon som henter og verifiserer variabler og lagrer de som objekter
     bølge_variabler = hent_og_verifiser_variabler()
 
-    # Denne variablen benyttes mye, så defineres en gang har for gjenbruk
-    bølge_variabler[0].total_tid = finn_total_tid(bølge_variabler[0])
-    
-    # Funksjon som lager en firkantpuls, basert på valgt pri mønster
-    bølge_variabler[0].firkant_puls = mattefunksjoner.firkantpuls(bølge_variabler[0])
+    int_eller_float = velg_int_eller_float()
 
-    # Denne funksjonen genererer sluttresultatet som skal være utgangspunktet for å generere IQ data. Denne bølgen benyttre seg av en rekke andre variabler, og også resultatet av firkantpulsen
-    bølge_variabler[0].endelig_bølge = lag_endelig_bølge(bølge_variabler[0])
-    
-    # Denne funksjonen genererer IQ data basert på den endelige bølgen
-    IQ_data = lag_IQ_data(bølge_variabler[0].endelig_bølge)
+    # Lager en tom liste for IQ data
+    IQ_data = []
 
-    # Denne funksjonen lagrer IQ data til en fil
+    # Itererer over alle objektene i listen og utfører funksjoner på de
+    for objekt in bølge_variabler:
+
+        # Finner total tid for bølgen
+        objekt.total_tid = finn_total_tid(objekt)
+
+        # Finner firkantpuls for bølgen
+        objekt.firkant_puls = mattefunksjoner.firkantpuls(objekt)
+
+        # Lager endelig bølge ved hjelp av firkantbølgen
+        objekt.endelig_bølge = lag_endelig_bølge(objekt)
+
+        # Lager IQ data basert på endelig bølge
+        IQ_data_segment = lag_IQ_data(objekt, int_eller_float)
+
+        # Legger til IQ data segmentet i en liste
+        IQ_data.append(IQ_data_segment)
+
+    # Konverterer listen til en numpy array
+    IQ_data = np.vstack(IQ_data)
+
+    # Skriver IQ data til en binær fil
     skriv_IQ_data(IQ_data)
 
-    #Plotter bølgen. Dette er for å kunne kryssjekke at den binære filen er riktig
-    mattefunksjoner.plott_resultat(bølge_variabler[0])
+    # Plotter resultatet ved å sende hele objektet
+    mattefunksjoner.plott_resultat(bølge_variabler)
 
-    
-
+# Passer på at main kjører først
 if __name__ == "__main__":
     main()

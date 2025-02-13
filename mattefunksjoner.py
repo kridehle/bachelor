@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import square
@@ -8,7 +9,7 @@ from scipy.signal import chirp
 def firkantpuls(bølge_variabler):
 
     # Beregner hviletiden for sart. Spesielt viktig i sammenheng med jitter
-    hvile_før_start = bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.duty_cycle * 2
+    hvile_før_start = bølge_variabler.pulsrepetisjonsintervall * 0.5
 
     # Beregner frekvensen for firkantpulsen
     f_firkant = 1 / bølge_variabler.pulsrepetisjonsintervall
@@ -34,13 +35,17 @@ def firkantpuls(bølge_variabler):
         jitter = np.random.uniform(-jitter_prosent * periode, jitter_prosent * periode, size=len(start_tider)) # Generer en tilfeldig jitter for hver puls
         start_tider_jittered = start_tider + jitter # Setter sammen start tidene, og jitteren for å lage en komplett tilfeldig firkantpuls
 
+        teller = 0
+
         # Generer firkantpuls
         firkantpuls = np.zeros_like(t_lokal) # Initierer firkantpulsen
         for start_tid in start_tider_jittered: # Itererer over hver start tid i jittered signalet
             start_idx = int(start_tid * bølge_variabler.samplingsfrekvens) # Startindeks, genereres av start tid og samplingsfrekvens. Lagres som en integer
             slutt_idx = int((start_tid + puls_bredde) * bølge_variabler.samplingsfrekvens) # Sluttindeks, er det samme som start_tid + pulsbredden. Alt må mulitiplisres med samplingsfrekvens
-            if start_idx < len(t_lokal): # Fortsetter løkken dersom start indeksen ikke er større en den avsluttene tiden.
-                firkantpuls[start_idx:slutt_idx] = 1
+            firkantpuls[start_idx:slutt_idx] = 1
+            if teller >= bølge_variabler.repetisjoner: # Sjekker om vi har nådd antall repetisjoner
+                break
+            teller += 1
 
         # Sett firkantpulsen til 0 frem til hviletiden
         firkantpuls[t_lokal < hvile_før_start] = 0
@@ -64,11 +69,14 @@ def firkantpuls(bølge_variabler):
             start_idx = int(start_tid * bølge_variabler.samplingsfrekvens)  # Startindeks
             slutt_idx = int((start_tid + puls_bredde) * bølge_variabler.samplingsfrekvens)  # Sluttindeks
 
-            if start_idx < len(tidsvektor):
-                firkantpuls[start_idx:slutt_idx] = 1  # Sett puls til 1
+            firkantpuls[start_idx:slutt_idx] = 1  # Sett puls til 1
 
             start_tid += pri_nåværende  # Neste startpunkt
             idx += 1  # Gå til neste PRI i mønsteret
+
+            # Passer på at vi ikke lager for mange pulser
+            if idx > len(bølge_variabler.stagger_verdier):
+                break
     
     # Dwell to dwell er ikke implementert enda
     elif bølge_variabler.pri_mønster == 'dwell-dwell':
@@ -198,15 +206,72 @@ def barkerbølge(bølge_variabler):
 
 # Funksjon som plotter resultatet slik at man kan se hvordan den binære filen skal se ut
 def plott_resultat(bølge_variabler):
-    # Plot the result
+    filnavn = "iq_data.bin"  # Bytt til filen din
 
-    tidsvektor = np.arange(0, bølge_variabler.total_tid, 1 / bølge_variabler.samplingsfrekvens)
+    # Velg int eller float
+    int_float = ''
 
-    plt.figure(figsize=(10, 4))
-    plt.plot(tidsvektor, bølge_variabler.endelig_bølge, label=f"(f={bølge_variabler.signalfrekvens} Hz, fs={bølge_variabler.samplingsfrekvens:.1f} Hz)",color = 'b')
-    plt.title("Visuell plot")
-    plt.xlabel("Tid (s)")
-    plt.ylabel("Amplitude")
-    plt.grid(True)
-    plt.savefig('output.png')
+    try:
+        int_float = input('\n\nVelg om du vil ha IQ data som float eller int.\nFloat32/int16\nSkirv "f" for float eller "i" for int. Dette er for å printe: ')
+        if int_float not in ["f","i"]:
+            raise ValueError("Ugyldig input. Programmet avsluttes")
+    except ValueError as err:
+        print(err)
+        sys.exit()
+
+    # Les inn data fra binær fil og tolk det som float eller int
+    if int_float == "f":
+        IQ_data = np.fromfile(filnavn, dtype=np.float32)    
+    else: 
+        IQ_data = np.fromfile(filnavn, dtype=np.int16) / 32767.0  # Normaliserer tilbake til [-1, 1]
+
+    # Split dataen i I- og Q-komponenter
+    I = IQ_data[::2]  # Hent I-komponenten (annenhver verdi)
+    Q = IQ_data[1::2]  # Hent Q-komponenten (annenhver verdi)
+
+    # Parametere for signalrekonstruksjon 
+    # Samplingsfrekens (Hz), må samsvare med det opprinnelige signalet
+    t = np.arange(len(I)) / bølge_variabler[0].samplingsfrekvens   # Tidsakse
+
+    I_carrier = np.cos(2 * np.pi * t)  # In-phase bærebølge
+    Q_carrier = np.sin(2 * np.pi * t)  # Quadrature bærebølge
+
+    # Demoduler for å finne I og Q
+    I = I * I_carrier  # I-komponenten
+    Q = Q * Q_carrier  # Q-komponenten
+
+    # Rekonstruer det originale signalet
+    reconstructed_signal = I + Q 
+
+    # Flate ut valideringsbølge til en enkelt numpy-array
+    valideringsbølge = np.concatenate([bølge.endelig_bølge for bølge in bølge_variabler])
+
+    # Lag en figur med to subplotter (2 rader, 1 kolonne)
+    fig, axs = plt.subplots(2, 1, figsize=(10, 6))  # To grafiske rutenett (akse)
+    fig.suptitle("Visuell plot av signalene")  # Tittel for hele figuren
+
+    # Plot rekonstruert signal på første subplot (øverste rutenett)
+    axs[0].plot(t, reconstructed_signal, color='r', label='Rekonstruert signal')
+    axs[0].set_title("Rekonstruert signal")
+    axs[0].set_xlabel("Tid (s)")
+    axs[0].set_ylabel("Amplitude")
+    axs[0].grid(True)
+    axs[0].legend()
+
+    # Plot valideringsbølge på andre subplot (nederste rutenett)
+    axs[1].plot(t, valideringsbølge, color='b', label='Valideringsbølge')
+    axs[1].set_title("Valideringsbølge")
+    axs[1].set_xlabel("Tid (s)")
+    axs[1].set_ylabel("Amplitude")
+    axs[1].grid(True)
+    axs[1].legend()
+
+    # Juster plasseringen av subplottene for å unngå overlapping
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.9)  # Justerer plass for figurtittel
+
+    # Lagre figuren som en fil
+    plt.savefig('output_bin.png')
+
+    # Lukk plottet
     plt.close()

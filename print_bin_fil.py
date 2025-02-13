@@ -17,7 +17,7 @@ filename = "iq_data.bin"  # Bytt til filen din
 int_float = ''
 
 try:
-    int_float = input('\n\nVelg om du vil ha IQ data som float eller int.\nFloat32/int16\nSkirv "f" for float eller "i" for int: ')
+    int_float = input('\n\nVelg om du vil ha IQ data som float eller int.\nFloat32/int16\nSkirv "f" for float eller "i" for int. Dette er for å printe: ')
     if int_float not in ["f","i"]:
         raise ValueError("Ugyldig input. Programmet avsluttes")
 except ValueError as err:
@@ -43,7 +43,7 @@ reconstructed_signal = I + Q
 
 # Plot det rekonstruerte signalet
 plt.figure(figsize=(10, 4))
-plt.plot(t, reconstructed_signal, lcolor = 'r')
+plt.plot(t, reconstructed_signal, color = 'r')
 plt.title("Visuell plot")
 plt.xlabel("Tid (s)")
 plt.ylabel("Amplitude")
