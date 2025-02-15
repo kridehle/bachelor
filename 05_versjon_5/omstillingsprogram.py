@@ -15,22 +15,9 @@ def hent_og_verifiser_variabler():
         teller += 1
     return bølge_variabler
 
-
-# Funksjon som lager IQ data basert på valgt bølge
-def lag_IQ_data(bølge_variabler, IQ_data_liste):
-
-    # Lager en tidsvektor
-    tidsvektor = np.arange(len(IQ_data_liste)) / bølge_variabler.samplingsfrekvens
-
-    # Lager en bærebølge som definerer I og Q
-    I_carrier = np.cos(2 * np.pi * tidsvektor)  # In-phase bærebølge
-    Q_carrier = np.sin(2 * np.pi * tidsvektor)  # Quadrature bærebølge
-
-    # Fordeler I og Q komponentene på bølgen
-    I = IQ_data_liste * I_carrier  # I-komponenten
-    Q = IQ_data_liste * Q_carrier  # Q-komponenten
-
-    # Spør brukeren om vedkommende ønker int eller float.
+# Funksjon som velger integer eller float
+def velg_int_eller_float():
+        # Spør brukeren om vedkommende ønker int eller float.
    
     # Initierer variablen 
     int_float = ''
@@ -40,6 +27,22 @@ def lag_IQ_data(bølge_variabler, IQ_data_liste):
     if int_float not in ["f","i"]:
         raise ValueError("Ugyldig input. Programmet avsluttes")
         sys.exit()
+    
+    return int_float
+
+# Funksjon som lager IQ data basert på valgt bølge
+def lag_IQ_data(bølge_variabler, int_float):
+
+    # Lager en tidsvektor
+    tidsvektor = np.arange(0, bølge_variabler.total_tid, 1 / bølge_variabler.samplingsfrekvens)
+
+    # Lager en bærebølge som definerer I og Q
+    I_carrier = np.cos(2 * np.pi * tidsvektor)  # In-phase bærebølge
+    Q_carrier = np.sin(2 * np.pi * tidsvektor)  # Quadrature bærebølge
+
+    # Fordeler I og Q komponentene på bølgen
+    I = bølge_variabler.endelig_bølge * I_carrier  # I-komponenten
+    Q = bølge_variabler.endelig_bølge * Q_carrier  # Q-komponenten
 
     # Lager IQ data som float eller int. For int så må verdiene multipliseres for at de ikke skal bli satt til null
     if int_float == 'f':
@@ -91,39 +94,46 @@ def lag_endelig_bølge(bølge_variabler):
         raise ValueError("Ugyldig puls type")
     return endelig_bølge_valg
 
-
 def main():
 
     # En funksjon som henter og verifiserer variabler og lagrer de som objekter
     bølge_variabler = hent_og_verifiser_variabler()
 
-    # Lager en tom liste for IQ data
-    IQ_data_liste = []
+    # En funksjon som spør brukeren om de vil ha int eller float til IQ data
+    int_eller_float = velg_int_eller_float()
 
+    # Lager en tom liste for IQ data
+    IQ_data = []
+
+    # Administrativt
+    teller = 1
     # Itererer over alle objektene i listen og utfører funksjoner på de
     for objekt in bølge_variabler:
-        
-        # henter den totale tiden for gitt bølgelengde
+
+        # Dersom det er flere enn en bølge så settes samplingsfrekvensen til den første bølgen
+        if teller !=1:
+            objekt.samplingsfrekvens = bølge_variabler[0].samplingsfrekvens
+
+        # Finner total tid for bølgen
         objekt.total_tid = finn_total_tid(objekt)
 
-        # Lager en firkantpuls som styrer pulsrepetisjonsmønsteret
+        # Finner firkantpuls for bølgen
         objekt.firkant_puls = mattefunksjoner.firkantpuls(objekt)
 
-        # Lager en endelig bølge basert på valgt puls type og firkant puls
+        # Lager endelig bølge ved hjelp av firkantbølgen
         objekt.endelig_bølge = lag_endelig_bølge(objekt)
 
-        IQ_data_liste = np.append(IQ_data_liste, objekt.endelig_bølge)
+        # Lager IQ data basert på endelig bølge
+        IQ_data_segment = lag_IQ_data(objekt, int_eller_float)
 
-    # Lager IQ data basert på 
-    IQ_data_liste = lag_IQ_data(bølge_variabler[0], IQ_data_liste)
+        # Legger til IQ data segmentet i en liste
+        IQ_data.append(IQ_data_segment)
 
-    # Printer IQ data listen for å validere at dataen ser forholdsmessig riktig ut
-    # Det er anbefalt å ikke inkludere dette for å få en hyggelig brukeropplevelse
-    # Dette er kun tenkt for å studere IQ data, for å detektere om data lages riktig eller feil
-    print(IQ_data_liste)
+    # Konverterer listen til en numpy array
+    IQ_data = np.vstack(IQ_data)
 
-    # Skriver IQ data til en fil
-    skriv_IQ_data(IQ_data_liste)
+    # Skriver IQ data til en binær fil
+    skriv_IQ_data(IQ_data)
 
     # Plotter resultatet ved å sende hele objektet
     mattefunksjoner.plott_resultat(bølge_variabler)

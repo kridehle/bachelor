@@ -216,7 +216,7 @@ def barkerbølge(bølge_variabler):
     return barker_bølge
 
 
-# Funksjon som plotter resultatet slik at man kan se hvordan den binære filen skal se ut, og sammenligne det med hvordan den binære filen ser ut
+# Funksjon som plotter resultatet slik at man kan se hvordan den binære filen skal se ut
 def plott_resultat(bølge_variabler):
     filnavn = "iq_data.bin"  # Bytt til filen din
 
@@ -243,31 +243,35 @@ def plott_resultat(bølge_variabler):
 
     # Parametere for signalrekonstruksjon 
     # Samplingsfrekens (Hz), må samsvare med det opprinnelige signalet
-    tidsvektor = np.arange(len(I)) / bølge_variabler[0].samplingsfrekvens   # Tidsakse
+    t = np.arange(len(I)) / bølge_variabler[0].samplingsfrekvens   # Tidsakse
 
-    # Genererer bærebølger for I og Q kanalen. Lager en in phase og en 90 graders faseforskøvet bærebølge
-    I_carrier = np.cos(2 * np.pi * tidsvektor)  # In-phase bærebølge
-    Q_carrier = np.sin(2 * np.pi * tidsvektor)  # Quadrature bærebølge
-
-    # Demoduler for å finne I og Q
-    I = I * I_carrier  # I-komponenten
-    Q = Q * Q_carrier  # Q-komponenten
+    # Flate ut valideringsbølge til en enkelt numpy-array
+    valideringsbølge = np.concatenate([bølge.endelig_bølge for bølge in bølge_variabler])
 
     # Rekonstruer det originale signalet
-    rekonstruert_signal = I + Q 
-
-    # Initierer valideringsbølgen
-    valideringsbølge = np.empty(0)
+    reconstructed_signal = np.zeros_like(t)
+    start_idx = 0
 
     for bølge in bølge_variabler:
-        valideringsbølge = np.append(valideringsbølge, bølge.endelig_bølge)
+        end_idx = start_idx + len(bølge.endelig_bølge)
+        t_bølge = np.arange(len(bølge.endelig_bølge)) / bølge.samplingsfrekvens
+
+        I_carrier = np.cos(2 * np.pi * t_bølge)  # In-phase bærebølge
+        Q_carrier = np.sin(2 * np.pi * t_bølge)  # Quadrature bærebølge
+
+        I_segment = I[start_idx:end_idx] * I_carrier  # I-komponenten
+        Q_segment = Q[start_idx:end_idx] * Q_carrier  # Q-komponenten
+
+        reconstructed_signal[start_idx:end_idx] = I_segment + Q_segment
+
+        start_idx = end_idx
 
     # Lag en figur med to subplotter (2 rader, 1 kolonne)
     fig, axs = plt.subplots(2, 1, figsize=(10, 6))  # To grafiske rutenett (akse)
     fig.suptitle("Visuell plot av signalene")  # Tittel for hele figuren
 
     # Plot rekonstruert signal på første subplot (øverste rutenett)
-    axs[0].plot(tidsvektor, rekonstruert_signal, color='r', label='Rekonstruert signal')
+    axs[0].plot(t, reconstructed_signal, color='r', label='Rekonstruert signal')
     axs[0].set_title("Rekonstruert signal")
     axs[0].set_xlabel("Tid (s)")
     axs[0].set_ylabel("Amplitude")
@@ -275,7 +279,7 @@ def plott_resultat(bølge_variabler):
     axs[0].legend()
 
     # Plot valideringsbølge på andre subplot (nederste rutenett)
-    axs[1].plot(tidsvektor, valideringsbølge, color='b', label='Valideringsbølge')
+    axs[1].plot(t, valideringsbølge, color='b', label='Valideringsbølge')
     axs[1].set_title("Valideringsbølge")
     axs[1].set_xlabel("Tid (s)")
     axs[1].set_ylabel("Amplitude")
