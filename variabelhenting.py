@@ -58,7 +58,7 @@ def henter_variabler():
         standard_puls_type = 'ukodet'
         standard_n_barker = 2
         standard_mønster = 'ukodet'
-        standard_repetisjoner = 2
+        standard_repetisjoner = 1
         standard_stagger_verdier = 0
 
 

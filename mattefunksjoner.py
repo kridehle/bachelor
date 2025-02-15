@@ -82,7 +82,13 @@ def firkantpuls(bølge_variabler):
     elif bølge_variabler.pri_mønster == 'dwell-dwell':
         print("dwell-dwell er ikke implementert enda")
 
+    elif bølge_variabler.pri_mønster == 'cw':
+        firkantpuls = np.ones_like(tidsvektor)
     
+    elif bølge_variabler.pri_mønster == 'pause':
+            # Skriver null til ett array for antall punkter i tdisvektoren
+        firkantpuls = np.zeros_like(tidsvektor)
+
     # En helt standard firkantpuls dersom ingen PRI modulering ikke er angitt
     else:
         tidsvektor = np.linspace(0, bølge_variabler.total_tid, int(bølge_variabler.samplingsfrekvens * bølge_variabler.total_tid), endpoint=False)
@@ -94,6 +100,8 @@ def firkantpuls(bølge_variabler):
 # Funksjon som genererer en sinus bølge. Det er vikgit at sinusbølgen følger firkantpulsen (tror jeg)
 def sinusbølge(bølge_variabler):
 
+    
+    
     # Definerer tidsvektor
     tidsvektor = np.arange(0, bølge_variabler.total_tid, 1 / bølge_variabler.samplingsfrekvens)
 
@@ -104,6 +112,10 @@ def sinusbølge(bølge_variabler):
 
     # Initier sinusbølgen
     sinus_bølge = np.zeros_like(tidsvektor)
+
+    if bølge_variabler.pri_mønster == 'cw':
+        sinus_bølge = np.sin(2 * np.pi * bølge_variabler.signalfrekvens * tidsvektor)
+        return sinus_bølge
 
     # Finn starten av hver firkantpuls-syklus (de tidene hvor firkantbølgen går fra 0 til 1)
     syklus_starter = np.where(np.diff((bølge_variabler.firkant_puls != 0).astype(int)) == 1)[0] + 1
@@ -233,18 +245,26 @@ def plott_resultat(bølge_variabler):
     # Samplingsfrekens (Hz), må samsvare med det opprinnelige signalet
     t = np.arange(len(I)) / bølge_variabler[0].samplingsfrekvens   # Tidsakse
 
-    I_carrier = np.cos(2 * np.pi * t)  # In-phase bærebølge
-    Q_carrier = np.sin(2 * np.pi * t)  # Quadrature bærebølge
-
-    # Demoduler for å finne I og Q
-    I = I * I_carrier  # I-komponenten
-    Q = Q * Q_carrier  # Q-komponenten
-
-    # Rekonstruer det originale signalet
-    reconstructed_signal = I + Q 
-
     # Flate ut valideringsbølge til en enkelt numpy-array
     valideringsbølge = np.concatenate([bølge.endelig_bølge for bølge in bølge_variabler])
+
+    # Rekonstruer det originale signalet
+    reconstructed_signal = np.zeros_like(t)
+    start_idx = 0
+
+    for bølge in bølge_variabler:
+        end_idx = start_idx + len(bølge.endelig_bølge)
+        t_bølge = np.arange(len(bølge.endelig_bølge)) / bølge.samplingsfrekvens
+
+        I_carrier = np.cos(2 * np.pi * t_bølge)  # In-phase bærebølge
+        Q_carrier = np.sin(2 * np.pi * t_bølge)  # Quadrature bærebølge
+
+        I_segment = I[start_idx:end_idx] * I_carrier  # I-komponenten
+        Q_segment = Q[start_idx:end_idx] * Q_carrier  # Q-komponenten
+
+        reconstructed_signal[start_idx:end_idx] = I_segment + Q_segment
+
+        start_idx = end_idx
 
     # Lag en figur med to subplotter (2 rader, 1 kolonne)
     fig, axs = plt.subplots(2, 1, figsize=(10, 6))  # To grafiske rutenett (akse)

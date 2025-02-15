@@ -11,6 +11,7 @@ def hent_og_verifiser_variabler():
     for n in bølge_variabler:
         print(f"\n\nDette er bølge variablene for bølge nummer: {teller}")
         variabelhenting.BølgeVariabler.verifiser_variabler(n)
+
         teller += 1
     return bølge_variabler
 
@@ -70,6 +71,11 @@ def finn_total_tid(bølge_variabler):
     # Hvis stagger benyttes så benyttes sumen av stagger verdiene + en ekstra for å få en fin graf
     if bølge_variabler.pri_mønster == 'stagger':
         total_tid = sum(bølge_variabler.stagger_verdier) + bølge_variabler.pulsrepetisjonsintervall #* (1-bølge_variabler.duty_cycle) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt
+    
+    # Pausepulsen bruker enn så lenge bare en total tid basert på pulsrepetisjonsintervall
+    elif bølge_variabler.pri_mønster == 'pause' or bølge_variabler.pri_mønster == 'cw':
+        total_tid = bølge_variabler.pulsrepetisjonsintervall
+    
     # En så lenge får alle andre funksjoner en total tid basert på pri, repetisjoner og duty cycle
     else:
         total_tid = (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.repetisjoner) + (bølge_variabler.pulsrepetisjonsintervall * (1 - bølge_variabler.duty_cycle)) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt fint endres, men ikke til mye mer før det kan bli problemer med antall repetisjoner
@@ -77,6 +83,7 @@ def finn_total_tid(bølge_variabler):
 
 # Funksjon som lager en bølge basert på valgt puls type
 def lag_endelig_bølge(bølge_variabler):
+
     # Her kalt for ukodet, dette er en sinusbølge.
     if bølge_variabler.puls_type == 'ukodet':
         endelig_bølge_valg = mattefunksjoner.sinusbølge(bølge_variabler)
@@ -84,8 +91,10 @@ def lag_endelig_bølge(bølge_variabler):
     elif bølge_variabler.puls_type == 'chirp':
         endelig_bølge_valg = mattefunksjoner.chirpbølge(bølge_variabler)
     # Her kalt for barker, dette er en barker bølge
-    else:   
+    elif bølge_variabler.puls_type == 'barker':   
         endelig_bølge_valg = mattefunksjoner.barkerbølge(bølge_variabler)
+    else:
+        raise ValueError("Ugyldig puls type")
     return endelig_bølge_valg
 
 def main():
@@ -93,13 +102,20 @@ def main():
     # En funksjon som henter og verifiserer variabler og lagrer de som objekter
     bølge_variabler = hent_og_verifiser_variabler()
 
+    # En funksjon som spør brukeren om de vil ha int eller float til IQ data
     int_eller_float = velg_int_eller_float()
 
     # Lager en tom liste for IQ data
     IQ_data = []
 
+    # Administrativt
+    teller = 1
     # Itererer over alle objektene i listen og utfører funksjoner på de
     for objekt in bølge_variabler:
+
+        # Dersom det er flere enn en bølge så settes samplingsfrekvensen til den første bølgen
+        if teller !=1:
+            objekt.samplingsfrekvens = bølge_variabler[0].samplingsfrekvens
 
         # Finner total tid for bølgen
         objekt.total_tid = finn_total_tid(objekt)
