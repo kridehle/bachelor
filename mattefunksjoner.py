@@ -1,8 +1,23 @@
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.signal import square
 from scipy.signal import chirp
+
+
+# Funksjon som regner ut total tid for bølgen, slik at den kan brukes til senere funksjoner
+def finn_total_tid(bølge_variabler):
+    # Hvis stagger benyttes så benyttes sumen av stagger verdiene + en ekstra for å få en fin graf
+    if bølge_variabler.pri_mønster == 'stagger':
+        total_tid = sum(bølge_variabler.stagger_verdier) + bølge_variabler.pulsrepetisjonsintervall #* (1-bølge_variabler.duty_cycle) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt
+    
+    # Pausepulsen bruker enn så lenge bare en total tid basert på pulsrepetisjonsintervall
+    elif bølge_variabler.pri_mønster == 'pause' or bølge_variabler.pri_mønster == 'cw':
+        total_tid = bølge_variabler.pulsrepetisjonsintervall
+    
+    # En så lenge får alle andre funksjoner en total tid basert på pri, repetisjoner og duty cycle
+    else:
+        total_tid = (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.repetisjoner) + (bølge_variabler.pulsrepetisjonsintervall * (1 - bølge_variabler.duty_cycle)) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt fint endres, men ikke til mye mer før det kan bli problemer med antall repetisjoner
+    return total_tid
 
 
 # Funksjon som kan generere mange forskjellige firkantpulser avhngig av hvilken type PRI-mønster som er valgt
@@ -114,7 +129,7 @@ def sinusbølge(bølge_variabler):
     sinus_bølge = np.zeros_like(tidsvektor)
 
     if bølge_variabler.pri_mønster == 'cw':
-        sinus_bølge = np.sin(2 * np.pi * bølge_variabler.signalfrekvens * tidsvektor)
+        sinus_bølge = bølge_variabler.amplitude * np.sin(2 * np.pi * bølge_variabler.signalfrekvens * tidsvektor)
         return sinus_bølge
 
     # Finn starten av hver firkantpuls-syklus (de tidene hvor firkantbølgen går fra 0 til 1)
@@ -127,7 +142,7 @@ def sinusbølge(bølge_variabler):
 
         # Beregn tidsvinduet for sinus innenfor denne syklusen
         lokal_tid = tidsvektor[start:slutt] - tidsvektor[start]  # Juster for å starte på 0
-        sinus_bølge[start:slutt] = np.sin(2 * np.pi * bølge_variabler.signalfrekvens * lokal_tid)
+        sinus_bølge[start:slutt] = bølge_variabler.amplitude * np.sin(2 * np.pi * bølge_variabler.signalfrekvens * lokal_tid)
 
     return sinus_bølge
 
@@ -154,7 +169,7 @@ def chirpbølge(bølge_variabler):
         slutt = start + int(chirp_varighet * bølge_variabler.samplingsfrekvens) # Samplingsfekvensen må mulitpliseres for å få korekkte punkter
         slutt = min(slutt, len(tidsvektor))  # Sørg for at vi ikke går utenfor tidsaksen
         # Beregn tidsvinduet for chirp innenfor denne syklusen. Bruker scipy sin chirp funksjon. Den er forhåndsdefinert
-        chirp_bølge[start:slutt] = chirp(tidsvektor[:slutt - start], start_frekvens, chirp_varighet, slutt_frekvens, method="linear")
+        chirp_bølge[start:slutt] = bølge_variabler.amplitude * chirp(tidsvektor[:slutt - start], start_frekvens, chirp_varighet, slutt_frekvens, method="linear")
 
     return chirp_bølge
 
@@ -211,83 +226,23 @@ def barkerbølge(bølge_variabler):
         lokal_sinus_bølge = np.sin(2 * np.pi * bølge_variabler.signalfrekvens * (tidsvektor[start:slutt] - tidsvektor[start]))  
 
         # Multipliserer barker sekvensen med den lokale sinusbølgen for å modulere den
-        barker_bølge[start:slutt] = barker_bølge[start:slutt] * lokal_sinus_bølge
+        barker_bølge[start:slutt] = barker_bølge[start:slutt] * lokal_sinus_bølge * bølge_variabler.amplitude
 
     return barker_bølge
 
 
-# Funksjon som plotter resultatet slik at man kan se hvordan den binære filen skal se ut, og sammenligne det med hvordan den binære filen ser ut
-def plott_resultat(bølge_variabler):
-    filnavn = "iq_data.bin"  # Bytt til filen din
+# Funksjon som lager en bølge basert på valgt puls type
+def lag_endelig_bølge(bølge_variabler):
 
-    # Velg int eller float
-    int_float = ''
-
-    try:
-        int_float = input('\n\nVelg om du vil ha IQ data som float eller int.\nFloat32/int16\nSkirv "f" for float eller "i" for int. Dette er for å printe: ')
-        if int_float not in ["f","i"]:
-            raise ValueError("Ugyldig input. Programmet avsluttes")
-    except ValueError as err:
-        print(err)
-        sys.exit()
-
-    # Les inn data fra binær fil og tolk det som float eller int
-    if int_float == "f":
-        IQ_data = np.fromfile(filnavn, dtype=np.float32)    
-    else: 
-        IQ_data = np.fromfile(filnavn, dtype=np.int16) / 32767.0  # Normaliserer tilbake til [-1, 1]
-
-    # Split dataen i I- og Q-komponenter
-    I = IQ_data[::2]  # Hent I-komponenten (annenhver verdi)
-    Q = IQ_data[1::2]  # Hent Q-komponenten (annenhver verdi)
-
-    # Parametere for signalrekonstruksjon 
-    # Samplingsfrekens (Hz), må samsvare med det opprinnelige signalet
-    tidsvektor = np.arange(len(I)) / bølge_variabler[0].samplingsfrekvens   # Tidsakse
-
-    # Genererer bærebølger for I og Q kanalen. Lager en in phase og en 90 graders faseforskøvet bærebølge
-    I_carrier = np.cos(2 * np.pi * tidsvektor)  # In-phase bærebølge
-    Q_carrier = np.sin(2 * np.pi * tidsvektor)  # Quadrature bærebølge
-
-    # Demoduler for å finne I og Q
-    I = I * I_carrier  # I-komponenten
-    Q = Q * Q_carrier  # Q-komponenten
-
-    # Rekonstruer det originale signalet
-    rekonstruert_signal = I + Q 
-
-    # Initierer valideringsbølgen
-    valideringsbølge = np.empty(0)
-
-    for bølge in bølge_variabler:
-        valideringsbølge = np.append(valideringsbølge, bølge.endelig_bølge)
-
-    # Lag en figur med to subplotter (2 rader, 1 kolonne)
-    fig, axs = plt.subplots(2, 1, figsize=(10, 6))  # To grafiske rutenett (akse)
-    fig.suptitle("Visuell plot av signalene")  # Tittel for hele figuren
-
-    # Plot rekonstruert signal på første subplot (øverste rutenett)
-    axs[0].plot(tidsvektor, rekonstruert_signal, color='r', label='Rekonstruert signal')
-    axs[0].set_title("Rekonstruert signal")
-    axs[0].set_xlabel("Tid (s)")
-    axs[0].set_ylabel("Amplitude")
-    axs[0].grid(True)
-    axs[0].legend()
-
-    # Plot valideringsbølge på andre subplot (nederste rutenett)
-    axs[1].plot(tidsvektor, valideringsbølge, color='b', label='Valideringsbølge')
-    axs[1].set_title("Valideringsbølge")
-    axs[1].set_xlabel("Tid (s)")
-    axs[1].set_ylabel("Amplitude")
-    axs[1].grid(True)
-    axs[1].legend()
-
-    # Juster plasseringen av subplottene for å unngå overlapping
-    plt.tight_layout()
-    plt.subplots_adjust(top=0.9)  # Justerer plass for figurtittel
-
-    # Lagre figuren som en fil
-    plt.savefig('output_bin.png')
-
-    # Lukk plottet
-    plt.close()
+    # Her kalt for ukodet, dette er en sinusbølge.
+    if bølge_variabler.puls_type == 'ukodet':
+        endelig_bølge_valg = sinusbølge(bølge_variabler)
+    # Her kalt for chirp, dette er en chip bøgle
+    elif bølge_variabler.puls_type == 'chirp':
+        endelig_bølge_valg = chirpbølge(bølge_variabler)
+    # Her kalt for barker, dette er en barker bølge
+    elif bølge_variabler.puls_type == 'barker':   
+        endelig_bølge_valg = barkerbølge(bølge_variabler)
+    else:
+        raise ValueError("Ugyldig puls type")
+    return endelig_bølge_valg

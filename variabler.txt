@@ -6,13 +6,13 @@
 # Bølge 1
 
 # CW bølge
-f 70 dc 0.4 fs 8000 pt chirp n 4 pm jitter r 3 pri 0.2
+a 3 f 7 dc 0.4 fs 8000 pt chirp n 4 pm jitter r 3 pri 0.2
 
-f 10 pri 0.7 fs 8000 pm cw
+f 10 pri 0.7 fs 8000 pm cw a 1
 # Pause bølge
-#f 10 dc 0.4 fs 800000 pm pause pri 1
+f 10 dc 0.4 fs 8000 pm pause pri 1
 
 # Bølge 2
-#f 70 dc 0.4 fs 800000 pt chirp n 4 pm jitter r 3 pri 0.2
+f 7 dc 0.4 fs 8000 pt barker n 4 pm jitter r 3 pri 0.2 a 2
 
-#f 70 dc 0.4 fs 800000 pt chirp n 4 pm jitter r 3 pri 0.2
+#f 70 dc 0.4 fs 800000 pt chirp n 4 pm jitter r 3 pri 0.2 a 3
