@@ -1,19 +1,19 @@
 # Her kan man legge inn variabler for å definere bølger. 
 # For å gjøre det riktig, sett inn {parameterdeskriptor} {verdi} {parameterdeskriptor} {verdi} ... 
+# For stagger, skriv stagger,{verdi},{verdi},...
+# For dwell - dwell skriv dwell,{verdi},{repetisjoner},{verdi},...
 # Ønsker du å legge inn kommentarer bare skriv inn en # foran det du ønsker å kommentere
 # '#' Kommenterer ut resten av linjen
+# Du kan definere fler bølger etter hverandre hvis du vil. Bare ta et linjeskift så definers en ny bølge
+# Bølgene kommer til å lages i den rekkefølgen du skriver de opp i. Øverst først
 
-# Bølge 1
+f 39 dc 0.5 fs 5000 pt ukodet pm cw r 1 pri 0.2 a 3
 
-# CW bølge
-a 3 f 7 dc 0.2 fs 8000 pt chirp n 4 pm dwell,0.1,3,1.0,2,0.4,4 pri 0.2
+a 3 f 7 dc 0.2 fs 5000 pt chirp n 4 pm dwell,0.1,3,0.15,2 pri 0.1
 
-#f 10 pri 0.7 fs 8000 pm cw a 1
-# Pause bølge
-#f 10 dc 0.4 fs 8000 pm pause pri 0.3
+#dc 0.6 f 100 pri 0.176 fs 500 pm cw a 1 r 20 pt barker 
+#f 10 dc 0.4 fs 5000 pm pause pri 0.3
 
-# Bølge 2
+#f 39 dc 0.5 fs 5000 pt ukodet n 7 pm cw r 1 pri 0.1 a 3
 
-#f 7 dc 0.4 fs 8000 pt barker n 4 pm jitter r 3 pri 0.2 a 2
-
-#f 70 dc 0.4 fs 800000 pt chirp n 4 pm jitter r 3 pri 0.2 a 3
+#f 10 dc 0.4 fs 5000 r 3 pri 0.1 a 3 pt chirp

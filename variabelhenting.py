@@ -117,16 +117,14 @@ def henter_variabler():
         stagger_verdier = deler[1:]
         # Stagger verdier lagres som floats
         stagger_verdier = list(map(float, stagger_verdier))
-        
+        # Dwell verider er annenhver av delene, og begynner på 1
         dwell_verdier = deler[1::2]
-
+        # Gjør dwell verdier til floats
         dwell_verdier = list(map(float, dwell_verdier))
-
+        # Dwell repetisjoner er annenhver av delene, og begynner på 2
         dwell_repetisjoner = deler [2::2]
-
+        # Gjør dwell repetisjoner til ints
         dwell_repetisjoner = list(map(int, dwell_repetisjoner))
-
-
 
         # Initierer total tid
         total_tid = np.array([])

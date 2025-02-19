@@ -4,7 +4,7 @@ import IQ_data_konvertering as IQ_dat
 import numpy as np
 
 # Dette er main. Hele programmet styres av denne funksjonen. Funksjoner som blir brukt i main ligger i andre programmer
-# De andre programmene er: mattefunksjoner.py, variabelhenting.py, og IQ_data_konvertering.py
+# De andre programmene er: mattefunksjoner.py, variabelhenting.py, og 
 def main():
 
     # En funksjon som henter og verifiserer variabler og lagrer de som objekter

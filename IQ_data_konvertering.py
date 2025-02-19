@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+from scipy.fft import fft, fftfreq
 
 # Funksjon som lager IQ data basert på valgt bølge
 def lag_IQ_data(bølge_variabler, IQ_data_liste):
@@ -9,8 +10,8 @@ def lag_IQ_data(bølge_variabler, IQ_data_liste):
     tidsvektor = np.arange(len(IQ_data_liste)) / bølge_variabler.samplingsfrekvens
 
     # Lager en bærebølge som definerer I og Q
-    I_carrier = np.cos(2 * np.pi * tidsvektor)  # In-phase bærebølge
-    Q_carrier = np.sin(2 * np.pi * tidsvektor)  # Quadrature bærebølge
+    I_carrier = np.cos(4 * np.pi * bølge_variabler.signalfrekvens * tidsvektor)  # In-phase bærebølge
+    Q_carrier = np.sin(4 * np.pi * bølge_variabler.signalfrekvens * tidsvektor)  # Quadrature bærebølge
 
     # Fordeler I og Q komponentene på bølgen
     I = IQ_data_liste * I_carrier  # I-komponenten
@@ -97,15 +98,15 @@ def plott_resultat(bølge_variabler):
     tidsvektor = np.arange(len(I)) / bølge_variabler[0].samplingsfrekvens   # Tidsakse
 
     # Genererer bærebølger for I og Q kanalen. Lager en in phase og en 90 graders faseforskøvet bærebølge
-    I_carrier = np.cos(2 * np.pi * tidsvektor)  # In-phase bærebølge
-    Q_carrier = np.sin(2 * np.pi * tidsvektor)  # Quadrature bærebølge
+    I_carrier = np.cos(4 * np.pi * bølge_variabler[0].signalfrekvens * tidsvektor)  # In-phase bærebølge
+    Q_carrier = np.sin(4 * np.pi * bølge_variabler[0].signalfrekvens * tidsvektor)  # Quadrature bærebølge
 
     # Demoduler for å finne I og Q
     I = I * I_carrier  # I-komponenten
     Q = Q * Q_carrier  # Q-komponenten
 
     # Rekonstruer det originale signalet
-    rekonstruert_signal = I + Q 
+    rekonstruert_signal = I + Q
 
     # Initierer valideringsbølgen
     valideringsbølge = np.empty(0)
@@ -113,8 +114,15 @@ def plott_resultat(bølge_variabler):
     for bølge in bølge_variabler:
         valideringsbølge = np.append(valideringsbølge, bølge.endelig_bølge)
 
+
+    # Utfør FFT
+    N = len(I)
+    yf = fft(rekonstruert_signal)
+    xf = fftfreq(N, 1/bølge_variabler[0].samplingsfrekvens)  # Frekvensaksen# Frekvensspektrum
+
+
     # Lag en figur med to subplotter (2 rader, 1 kolonne)
-    fig, axs = plt.subplots(2, 1, figsize=(10, 6))  # To grafiske rutenett (akse)
+    fig, axs = plt.subplots(4, 1, figsize=(16, 9))  # To grafiske rutenett (akse)
     fig.suptitle("Visuell plot av signalene")  # Tittel for hele figuren
 
     # Plot rekonstruert signal på første subplot (øverste rutenett)
@@ -132,6 +140,21 @@ def plott_resultat(bølge_variabler):
     axs[1].set_ylabel("Amplitude")
     axs[1].grid(True)
     axs[1].legend()
+
+    axs[2].plot(tidsvektor, I, color='b', label='I bølge')
+    axs[2].plot(tidsvektor, Q, color='r', label='Q bølge')
+    axs[2].set_title("IQ bølger")
+    axs[2].set_xlabel("Tid (s)")
+    axs[2].set_ylabel("Amplitude")
+    axs[2].grid(True)
+    axs[2].legend()
+
+
+    axs[3].plot(xf[:N//2], np.abs(yf[:N//2]) * 2 / N)  # Normalisert spektrum
+    axs[3].set_title("Frekvensspekter")
+    axs[3].set_xlabel("Frekvens [Hz]")
+    axs[3].set_ylabel("Amplitude")
+    axs[3].set_xlim(0, bølge_variabler[0].samplingsfrekvens/10)  # Viser kun positive frekvenser
 
     # Juster plasseringen av subplottene for å unngå overlapping
     plt.tight_layout()
