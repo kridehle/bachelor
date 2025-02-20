@@ -42,3 +42,8 @@ amplitude: a [ønsket amplitude]
 
 dutycycle: dc [ønsket dutycycle]
 ```
+
+Ett eksempel på en bølge er:
+```
+f 100 fs 10000 pri 0.1 pm jitter pt chirp a 5 r 6
+```
