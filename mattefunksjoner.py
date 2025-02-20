@@ -7,7 +7,7 @@ from scipy.signal import chirp
 def finn_total_tid(bølge_variabler):
     # Hvis stagger benyttes så benyttes sumen av stagger verdiene + en ekstra for å få en fin graf
     if bølge_variabler.pri_mønster == 'stagger':
-        total_tid = sum(bølge_variabler.stagger_verdier) + bølge_variabler.pulsrepetisjonsintervall #* (1-bølge_variabler.duty_cycle) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt
+        total_tid = sum(bølge_variabler.stagger_verdier) #+ bølge_variabler.stagger_verdier[len(bølge_variabler.stagger_verdier) - 1] #* (1-bølge_variabler.duty_cycle) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt
     
     # Hvis dwell - dwell brukes regnes tidsvektoren ut på følgende måte
     elif bølge_variabler.pri_mønster == 'dwell':
@@ -18,6 +18,7 @@ def finn_total_tid(bølge_variabler):
         # Itererer n ganger (lengden) på inputen. Og ganger pri tider med repetissjoner
         for pri_verdi in range (len(bølge_variabler.dwell_verdier)):
             total_tid += bølge_variabler.dwell_verdier[pri_verdi] * bølge_variabler.dwell_repetisjoner[pri_verdi]
+        
 
     # Pausepulsen bruker enn så lenge bare en total tid basert på pulsrepetisjonsintervall
     elif bølge_variabler.pri_mønster == 'pause' or bølge_variabler.pri_mønster == 'cw':
@@ -25,7 +26,7 @@ def finn_total_tid(bølge_variabler):
     
     # Jitter og fixed får følgende total tid
     else:
-        total_tid = (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.repetisjoner) + (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.duty_cycle) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt fint endres, men ikke til mye mer før det kan bli problemer med antall repetisjoner
+        total_tid = (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.repetisjoner) #+ (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.duty_cycle) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt fint endres, men ikke til mye mer før det kan bli problemer med antall repetisjoner
     
     return total_tid
 
@@ -101,7 +102,7 @@ def firkantpuls(bølge_variabler):
         firkantpuls = np.zeros_like(tidsvektor)  
 
         # Forsikrer at tiden ikke begynner på null, fordi da er det ikke sikkert senere bølge fanger opp at den går fra 0 til 1
-        start_tid = pri_mønster[0] 
+        start_tid = tidsvektor[1]
 
         # Gjennomgår for hvert eneste pri_mønster angitt
         for repetisjon in range (len(pri_mønster)):
@@ -140,7 +141,7 @@ def firkantpuls(bølge_variabler):
         firkantpuls = np.zeros_like(tidsvektor)
         
         # Setter at første puls ikke begynner momentant, men begynner etter en viss periode som da er gitt av en pri lengde
-        start_tid = pri_mønster[0]
+        start_tid = tidsvektor[1]
 
         # En administrativ teller
         teller = 1
@@ -183,10 +184,28 @@ def firkantpuls(bølge_variabler):
         # Lager en tidsvektor
         tidsvektor = np.linspace(0, bølge_variabler.total_tid, int(bølge_variabler.samplingsfrekvens * bølge_variabler.total_tid), endpoint=False)
         
-        # Bruker numpy square funksjonen for å lage en firkantpuls med forhåndsdefinert frekvens. Plusser på en og deler på 2 for å 
-        # Variere pulsen mellom 1 og 0 i stedet for -1 og 1
-        firkantpuls = (square(2 * np.pi * f_firkant * tidsvektor, duty=bølge_variabler.duty_cycle) + 1) / 2
-    
+        # Initierer firkantpuls
+        firkantpuls = np.zeros_like(tidsvektor)
+
+        # Pulsbredden defineres av pri og duty cycle
+        puls_bredde = bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.duty_cycle  # Beregn pulsbredden
+
+        # Passer på at pulsen ikke begynner på 0
+        start_tid = tidsvektor[1]
+
+        for repetisjoner in range (bølge_variabler.repetisjoner):
+            
+            # Startindeks settes til start tiden multiplisert med samplingsfrekvens, for å få et faktisk samplingspunkt
+            start_idx = int(start_tid * bølge_variabler.samplingsfrekvens) 
+
+            # Sluttindeks settes til start tid + en pulsbredde, og her igjen mulitiplisert med samplingsfrekvensen
+            slutt_idx = int((start_tid + puls_bredde) * bølge_variabler.samplingsfrekvens)  
+
+            # Her lages faktisk selve pulsen, ved at den settes til 1 mellom start og slutt for en puls
+            firkantpuls[start_idx:slutt_idx] = 1  
+
+            # Lager et nytt startpunkt
+            start_tid += bølge_variabler.pulsrepetisjonsintervall
     return firkantpuls
 
 
