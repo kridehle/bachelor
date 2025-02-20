@@ -2,40 +2,40 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 from scipy.fft import fft, fftfreq
-from scipy.signal import hilbert
 
-# Funksjon som lager IQ data basert på valgt bølge
-def lag_IQ_data(bølge_variabler,I_signal, Q_signal):
-
-    # Lager en tidsvektor
-    tidsvektor = np.arange(0, bølge_variabler.total_tid, 1 / bølge_variabler.samplingsfrekvens)
-    #tidsvektor = np.arange(len(I_signal)) / bølge_variabler.samplingsfrekvens
-
-    print(len(tidsvektor))
-
-    int_float = ''
-
+# Funksjon som henter brukerinput, hvor brukeren kan velge om vedkommende vil benytte seg av ints eller floats
+def int_eller_float():
     # Tar input,og sjekker om den er riktig. Ellers avslutts programmet
     int_float = input('\n\nVelg om du vil ha IQ data som float eller int.\nFloat32/int16\nSkirv "f" for float eller "i" for int: ')
     if int_float not in ["f","i"]:
         raise ValueError("Ugyldig input. Programmet avsluttes")
         sys.exit()
+        
+    return int_float
 
-    # Lager IQ data som float eller int. For int så må verdiene multipliseres for at de ikke skal bli satt til null
+
+# Funksjon som lager IQ data basert på valgt bølge
+def lag_IQ_data(int_float ,I_signal, Q_signal):
+
+    # Lager IQ data som float eller int. 
+    # For int så må verdiene multipliseres for at de ikke skal bli satt til null. Det fordi at
+    # De aller fleste verdiene vil være plassert ut mellom 0 og 1, og alle vil da bli tolket som 0, ved en transformasjon
+    # fra float til int
     if int_float == 'f':
-        # Kombiner I og Q til ett datasett
-        IQ_data = np.column_stack((I_signal, Q_signal)).astype(np.float32)  # 32-bit floats
+        # Kombiner I og Q til ett datasett som float med 32 bits
+        IQ_data = np.column_stack((I_signal, Q_signal)).astype(np.float32)
     else:
+        # Kombinerer I og Q til ett datasett som int med 16 bits
         # Standard skaleringsverdi for en 16 bits integer
         int_skalar = 32767
-        # Kombiner I og Q til ett datasett
-        IQ_data = (np.column_stack((I_signal, Q_signal)) * int_skalar)# Her må det legges inn en algoritme for å finne den største amplituden
+        # Kombiner I og Q til ett datasett, og multipliserer verdiene med skalaren for å senere kunne transformere den til ints
+        IQ_data = (np.column_stack((I_signal, Q_signal)) * int_skalar)
         
         # Finner den maksimale amplituden. Hvis ikke dataen normalfordels, ender man opp med å få verdier som er større enn 
         # En 16 bits integral sin maksgrense. Da blir verdiene bare tull
         max_amplitude = np.max(IQ_data) / int_skalar
         
-        # IQ dataen tilpasses np.int16
+        # IQ dataen tilpasses np.int16. Dette er for å forikre om at verdiene ikke overstiger +-32767
         IQ_data /= max_amplitude
 
         # IQ dataen lagres som en np.int16
@@ -52,64 +52,65 @@ def lag_IQ_data(bølge_variabler,I_signal, Q_signal):
 def skriv_IQ_data(IQ_data):
     # Lagre til en .bin-fil
     filnavn = "iq_data.bin"
-    #Skriver IQ data til fil
+    #Skriver IQ data til fil som skrives til i binær modus. (write binary)
     with open (filnavn, "wb") as fil:
         fil.write(IQ_data)
 
-    print(f"I/Q-data lagret til {filnavn}")
+    print(f"\n\nI/Q-data lagret til {filnavn}")
 
+# Denne funksjonen har egentlig ikke noe å si for sluttproduktet til programmet, men er tiltenkt for å være en valideringsfunksjon for mennesker
+# Denne funksjonen tilrettelgger for at man kan plotte det orginale signalet, hentet direkte ut fra de matematiske formlene
+# Samtidig som funksjonen plotter et rekonstruert signal basert på IQ dataen som er konstruert
+# I og Q plottes også hver for seg. Dette er veldig viktig for å validere at IQ dataen faktisk er korrekt
+# Det blir også gjort en spektrumsanalyse av signalet som er rekonsturert, for å identifisere hvilke frekvenser som faktisk ligger i signalet
+def plott_resultat(int_float, bølge_variabler):
+    
+    # Definerer navnet på filen med IQ data
+    filnavn = "iq_data.bin"
 
-    # Funksjon som plotter resultatet slik at man kan se hvordan den binære filen skal se ut, og sammenligne det med hvordan den binære filen ser ut
-
-# Funksjon som plotter bølgen basert på selve bølgen, og på IQ data, slik at det kan sammenlignes
-def plott_resultat(bølge_variabler):
-    filnavn = "iq_data.bin"  # Bytt til filen din
-
-    # Velg int eller float
-    int_float = ''
-
-    try:
-        int_float = input('\n\nVelg om du vil ha IQ data som float eller int.\nFloat32/int16\nSkirv "f" for float eller "i" for int. Dette er for å printe: ')
-        if int_float not in ["f","i"]:
-            raise ValueError("Ugyldig input. Programmet avsluttes")
-    except ValueError as err:
-        print(err)
-        sys.exit()
-
+    # Initierer listen som inneholder IQ data
     IQ_data = []
     
-    # Les inn data fra binær fil og tolk det som float eller int
+    # Les inn data fra binær fil og tolk det som float eller int avhenig av brukerens input
     if int_float == "f":
+        # Her leses listen som om det er flyttall som er lagret i den binære filen med 32 bits lengde
         IQ_data = np.fromfile(filnavn, dtype=np.float32)    
     else: 
-        IQ_data = np.fromfile(filnavn, dtype=np.int16) / 32767.0  # Normaliserer tilbake til [-1, 1]
+        # Her leses listen som om det er ints som er lagret i den binære filen. Her skaleres verdiene ned igjen til normale verdier, etter
+        # å ha blitt skalert opp i første omgang, før den ble lagret
+        IQ_data = np.fromfile(filnavn, dtype=np.int16) / 32767.0  
 
-    # Split dataen i I- og Q-komponenter
-    I = IQ_data[::2]  # Hent I-komponenten (annenhver verdi)
-    Q = IQ_data[1::2]  # Hent Q-komponenten (annenhver verdi)
+    # Split dataen i I- og Q-komponenter. I dataen er annenhver plass fra posisjon 0, og Q er annenhver plass fra posisjon 1
+    I = IQ_data[::2]  
+    Q = IQ_data[1::2]  
 
-    # Parametere for signalrekonstruksjon 
-    # Samplingsfrekens (Hz), må samsvare med det opprinnelige signalet
-    tidsvektor = np.arange(len(I)) / bølge_variabler[0].samplingsfrekvens   # Tidsakse
+    # Lgaer en tidsvektor med hensyn på lengden av In phae komponenten (som er det samme som lengden på Quadruature komponenten)
+    # og samplingsfrekvensn til signalet. 
+    tidsvektor = np.arange(len(I)) / bølge_variabler[0].samplingsfrekvens   
     
-    # Rekonstruer det originale signalet
+    # Rekonstruer det originale signalet ved å addere sammen I og Q data
     rekonstruert_signal = I + Q 
 
     # Initierer valideringsbølgen
-    valideringsbølge = np.empty(0)
+    valideringsbølge = []
 
+    # Legger tli alle bølgene fra de forskjellgie iterasjonene til en stor bølge
+    # Denne bølgen kommer til å brukes til kontrollering av det orginale
     for bølge in bølge_variabler:
         valideringsbølge = np.append(valideringsbølge, bølge.endelig_bølge)
         
         
-    #Fouriertransform for å plotte frekvensspekteret
+    # Setter av en verdi som er lengden på det rekonsruerte signalet
     N = len(rekonstruert_signal)
     
+    # Tar en foriertransform av det rekonsturerte signalet
     fft_rekonsturert_signal = np.fft.fft(rekonstruert_signal)
     
+    # Benytter numpy sin frekvensfunksjon til å definere en x akse laget av frekvenser
     frekvenser = np.fft.fftfreq(N, d = 1/bølge_variabler[0].samplingsfrekvens)
     
-    magnitude= np.abs(fft_rekonsturert_signal) / N
+    # Definerer magnitude basert på absolutt verdien av fouriertransformen
+    magnitude = np.abs(fft_rekonsturert_signal) / N
         
         
     # Lag en figur med to subplotter (2 rader, 1 kolonne)
@@ -150,10 +151,11 @@ def plott_resultat(bølge_variabler):
     axs[3].grid(True)
 
 
-
     # Juster plasseringen av subplottene for å unngå overlapping
     plt.tight_layout()
-    plt.subplots_adjust(top=0.9)  # Justerer plass for figurtittel
+    
+    # Justerer plass for figurtittel
+    plt.subplots_adjust(top=0.9)  
 
     # Lagre figuren som en fil
     plt.savefig('output_bin.png')

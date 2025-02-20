@@ -26,6 +26,7 @@ def finn_total_tid(bølge_variabler):
     # Jitter og fixed får følgende total tid
     else:
         total_tid = (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.repetisjoner) + (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.duty_cycle) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt fint endres, men ikke til mye mer før det kan bli problemer med antall repetisjoner
+    
     return total_tid
 
 
@@ -99,15 +100,14 @@ def firkantpuls(bølge_variabler):
         # Initier signalet
         firkantpuls = np.zeros_like(tidsvektor)  
 
-        # Forsikrer at tiden begynner på null
-        start_tid = 0 
+        # Forsikrer at tiden ikke begynner på null, fordi da er det ikke sikkert senere bølge fanger opp at den går fra 0 til 1
+        start_tid = pri_mønster[0] 
 
-        # Indeks for PRI-mønsteret
-        teller = 0  
-        while start_tid < bølge_variabler.total_tid:
+        # Gjennomgår for hvert eneste pri_mønster angitt
+        for repetisjon in range (len(pri_mønster)):
             
             # Hent PRI fra mønsteret for gjeldende iterasjon
-            pri_nåværende = pri_mønster[teller]  
+            pri_nåværende = pri_mønster[repetisjon]  
 
             # Beregn pulsbredden
             puls_bredde = pri_nåværende * bølge_variabler.duty_cycle  
@@ -124,13 +124,7 @@ def firkantpuls(bølge_variabler):
             # Neste startpunkt
             start_tid += pri_nåværende
 
-            # Gå til neste PRI i mønsterrekken
-            teller += 1  
 
-            # Passer på at vi ikke lager for mange pulser
-            if teller > len(bølge_variabler.stagger_verdier):
-                break
-    
     # Firkantpuls som lager bølger basert på dwell to dwell 
     elif bølge_variabler.pri_mønster == 'dwell':
 
@@ -181,8 +175,8 @@ def firkantpuls(bølge_variabler):
     
     # Firkantpuls som defineres for pausefunksjoner. Som forrige funksjon bare med null
     elif bølge_variabler.pri_mønster == 'pause':
-            # Skriver null til ett array for antall punkter i tdisvektoren
-        firkantpuls = np.zeros_like(tidsvektor)
+        # Skriver 0 til hele firkantpulsen
+        firkantpuls = np.zeros_like(tidsvektor) 
 
     # En helt standard firkantpuls dersom ingen PRI modulering ikke er angitt. Da antas fixed
     else:
@@ -196,7 +190,7 @@ def firkantpuls(bølge_variabler):
     return firkantpuls
 
 
-# Funksjon som genererer en sinus bølge. Det er vikgit at sinusbølgen følger firkantpulsen (tror jeg)
+# Funksjon som genererer en sinus bølge 
 def sinusbølge(bølge_variabler):
 
     # Definerer tidsvektor
@@ -205,48 +199,53 @@ def sinusbølge(bølge_variabler):
     # Definerer lengden på en pulsbredde
     sinus_varighet = bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.duty_cycle
 
-    # Initier sinusbølgen
+    # Initier sinusbølgen, I bølgen, og Q bølgen
     sinus_bølge = np.zeros_like(tidsvektor)
-    
     I_signal = np.zeros_like(tidsvektor)
     Q_signal = np.zeros_like(tidsvektor)
 
-    # Sinusbølge som lages dersom continuous wave er valgt
+    # Sinusbølge, I bølge og Q bølge som lages dersom continuous wave er valgt
     if bølge_variabler.pri_mønster == 'cw':
-        sinus_bølge = bølge_variabler.amplitude * np.sin(2 * np.pi * bølge_variabler.signalfrekvens * tidsvektor)
-        I_signal =    bølge_variabler.amplitude * np.cos(2 * np.pi * bølge_variabler.signalfrekvens * tidsvektor - np.pi/4)
-        Q_signal =    bølge_variabler.amplitude * np.sin(2 * np.pi * bølge_variabler.signalfrekvens * tidsvektor - np.pi/4)
+        fase = 2 * np.pi * bølge_variabler.signalfrekvens * tidsvektor
+        sinus_bølge = bølge_variabler.amplitude * np.sin(fase)
+        # Faseforskyver I og Q signalene noe, for å få det rekonsturerte signalet til å begynne på riktig måte
+        I_signal =    bølge_variabler.amplitude * np.cos(fase - np.pi/4)
+        Q_signal =    bølge_variabler.amplitude * np.sin(fase - np.pi/4)
+        
+    if bølge_variabler.pri_mønster == 'pause':
+        pass
 
     # Finn starten av hver firkantpuls-syklus (de tidene hvor firkantbølgen går fra 0 til 1)
     syklus_starter = np.where(np.diff((bølge_variabler.firkant_puls != 0).astype(int)) == 1)[0] + 1
 
-    # Iterer over hver syklus og generer sinus som starter på nytt. (Hver gang firkatnpulsen går fra 0 til 1)
+    # Iterer over hver syklus og generer sinus, Ibølge, Qbølge som starter på nytt. (Hver gang firkatnpulsen går fra 0 til 1)
     for start in syklus_starter:
         
         # Slutt er det samme som start + varigheten på pulsen. Må gange med samplingsfrekvens for å få det riktig
         slutt = start + int(sinus_varighet * bølge_variabler.samplingsfrekvens) 
         
-        # Sørg for at vi ikke går utenfor tidsaksen
+        # Sørger for at vi ikke går utenfor tidsaksen
         slutt = min(slutt, len(tidsvektor))  
 
         # Beregn tidsvinduet for sinus innenfor denne syklusen. Kan da være synkronisert ved usynkrone pulser
         lokal_tid = tidsvektor[start:slutt] - tidsvektor[start]  
 
-        # Funksjon som faktisk lager sinusbølgen i en gitt tidsperiode
-        sinus_bølge[start:slutt] = bølge_variabler.amplitude * np.sin(2 * np.pi * bølge_variabler.signalfrekvens * lokal_tid)
-        I_signal[start:slutt] =    bølge_variabler.amplitude * np.cos(2 * np.pi * bølge_variabler.signalfrekvens * lokal_tid - np.pi/4)
-        Q_signal[start:slutt] =    bølge_variabler.amplitude * np.sin(2 * np.pi * bølge_variabler.signalfrekvens * lokal_tid - np.pi/4)
+        #  Lager bølgene i en gitt tidsperiode
+        fase = 2 * np.pi * bølge_variabler.signalfrekvens * lokal_tid
+        sinus_bølge[start:slutt] = bølge_variabler.amplitude * np.sin(fase)
+        # Faseforskyver I og Q signalene noe for at det rekonstruerte signalet skal begynne på riktig tidspunkt
+        I_signal[start:slutt] =    bølge_variabler.amplitude * np.cos(fase - np.pi/4)
+        Q_signal[start:slutt] =    bølge_variabler.amplitude * np.sin(fase - np.pi/4)
         
-    print(f"lengden av sinus bølge: {len(sinus_bølge)}")
-    print(f"lengden av I_signal: {len(I_signal)}")
-    print(f"lengden av Q_signal: {len(Q_signal)}")
-
     return sinus_bølge, I_signal, Q_signal
 
 
-
+# Funksjon som genrer en chirp bølge
 def chirpbølge(bølge_variabler):
-    start_frekvens = bølge_variabler.signalfrekvens  # Startfrekvens
+    # Definerer en startfrekvens
+    start_frekvens = bølge_variabler.signalfrekvens  
+    # Definerer en sluttfrekvens
+    # Her vil det være mulig å endre slik at sluttfrekvensen kan justeres på av en bruker
     slutt_frekvens = bølge_variabler.signalfrekvens * 10  # Sluttfrekvens
     
     # Pulsbreddetid defineres
@@ -255,7 +254,7 @@ def chirpbølge(bølge_variabler):
     # Tidsvektor defineres
     tidsvektor = np.arange(0, bølge_variabler.total_tid, 1 / bølge_variabler.samplingsfrekvens)
 
-    # Initier chirp-signalet og IQ-komponenter
+    # Initier chirp-signalet og IQ-signaler
     chirp_bølge = np.zeros_like(tidsvektor)
     I_signal = np.zeros_like(tidsvektor)
     Q_signal = np.zeros_like(tidsvektor)
@@ -265,26 +264,27 @@ def chirpbølge(bølge_variabler):
 
     # Iterer over hver syklus og generer chirp
     for start in syklus_starter:
-        slutt = start + int(chirp_varighet * bølge_variabler.samplingsfrekvens)  # Beregn sluttpunkt
-        slutt = min(slutt, len(tidsvektor))  # Sørg for at vi ikke går utenfor tidsaksen
+        # Beregner punkt for slutt. Slutt er start + varigheten til en puls
+        slutt = start + int(chirp_varighet * bølge_variabler.samplingsfrekvens)  
         
-        # Lokal tidsvektor for chirp innenfor denne pulsen
+        # Sørger for at programmet holder seg innenfor tidsaksen
+        slutt = min(slutt, len(tidsvektor)) 
+        
+        # Lokal tidsvektor for chirp innenfor nåværende puls
         lokal_tid = np.linspace(0, chirp_varighet, slutt - start, endpoint=False)
         
-        # Beregn faser ved å integrere frekvensen (fase = 2π * integral av frekvens)
-        fase = 2 * np.pi * (start_frekvens * lokal_tid + (slutt_frekvens - start_frekvens) / (2 * chirp_varighet) * lokal_tid**2) + np.pi/4
+        # Beregn faser ved å integrere frekvensen (fase = 2 pi * integral av frekvens)
+        fase = 2 * np.pi * (start_frekvens * lokal_tid + (slutt_frekvens - start_frekvens) / (2 * chirp_varighet) * lokal_tid**2) 
 
-        # Generer I- og Q-signaler med korrekt chirp-frekvens
-        I_signal[start:slutt] = bølge_variabler.amplitude * np.cos(fase)
-        Q_signal[start:slutt] = bølge_variabler.amplitude * np.sin(fase)
+        # Generer I- og Q-signaler med korrekt chirp-frekvens. (frekvensen endres lineært fra start til slutt)
+        I_signal[start:slutt] = bølge_variabler.amplitude * np.cos(fase + np.pi / 4)
+        Q_signal[start:slutt] = bølge_variabler.amplitude * np.sin(fase + np.pi / 4)
 
         # Generer selve chirp-bølgen (kan være lik I eller en annen definisjon)
         chirp_bølge[start:slutt] = bølge_variabler.amplitude * chirp(lokal_tid, start_frekvens, chirp_varighet, slutt_frekvens, method="linear")
 
 
     return chirp_bølge, I_signal, Q_signal
-
-
 
 
 # Funksjon som genererer en barker bølge
@@ -333,20 +333,27 @@ def barkerbølge(bølge_variabler):
         samples_per_bit = (slutt - start) // bølge_variabler.n_barker
 
         # Generer Barker-sekvens i dette tidsvinduet
-        for i, bit in enumerate(barker_sekvens): # Henter ut plassering og verdi fra barker sekvensen i 'i' og bit
-            bit_start = start + i * samples_per_bit # Definerer en start avhengig av varigheten fra tideligere bits
-            bit_slutt = min(bit_start + samples_per_bit, slutt) # Beregner avsluttende tid og forsikrer om at tiden ikke passerer 'slutt' slik at vektoren blir for lang
-            barker_bølge_sekvens[bit_start:bit_slutt] = bit # Dette fyller en periode i barker sekvensen med en bit. Enten +1 eller -1
+        # Henter ut plassering og verdi fra barker sekvensen i 'i' og bit
+        for i, bit in enumerate(barker_sekvens): 
+            
+             # Definerer en start avhengig av varigheten fra tideligere bits
+            bit_start = start + i * samples_per_bit
+            
+            # Beregner avsluttende tid og forsikrer om at tiden ikke passerer 'slutt' slik at vektoren blir for lang
+            bit_slutt = min(bit_start + samples_per_bit, slutt) 
+            
+            # Dette fyller en periode i barker sekvensen med en bit. Enten +1 eller -1
+            barker_bølge_sekvens[bit_start:bit_slutt] = bit
 
-        # Generer lokal sinusbølge som starter på nytt for hver firkantpuls-syklus
+        # Definerer fase
         fase = 2 * np.pi * bølge_variabler.signalfrekvens * (tidsvektor[start:slutt] - tidsvektor[start])
+        
+        # Generer lokal sinusbølge som starter på nytt for hver firkantpuls-syklus
         lokal_sinus_bølge = np.sin(fase)  
 
-        # Multipliserer barker sekvensen med den lokale sinusbølgen for å modulere den
+        # Multipliserer barker sekvensen med den lokale sinusbølgen for å modulere den. Det samme gjøres for I og Q signalene
         barker_bølge_endelig[start:slutt] = barker_bølge_sekvens[start:slutt] * lokal_sinus_bølge * bølge_variabler.amplitude
-
         I_signal[start:slutt] = barker_bølge_sekvens[start:slutt] * np.cos(fase - np.pi /4) * bølge_variabler.amplitude 
-        
         Q_signal[start:slutt] = barker_bølge_sekvens[start:slutt] * np.sin(fase - np.pi /4) * bølge_variabler.amplitude
         
     return barker_bølge_endelig, I_signal, Q_signal
@@ -365,5 +372,6 @@ def lag_endelig_bølge(bølge_variabler):
     elif bølge_variabler.puls_type == 'barker':   
         endelig_bølge_valg = barkerbølge(bølge_variabler)
     else:
+    # Hvis ikke dette er valgt, er det en ugyldig puls type, og programmet avsluttes
         raise ValueError("Ugyldig puls type")
     return endelig_bølge_valg

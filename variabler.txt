@@ -7,4 +7,17 @@
 # Du kan definere fler bølger etter hverandre hvis du vil. Bare ta et linjeskift så definers en ny bølge
 # Bølgene kommer til å lages i den rekkefølgen du skriver de opp i. Øverst først
 
-f 200 pri 0.1 pm cw pt ukodet fs 10000
+# Conitnuous wave
+#f 20 pri 0.1 pm cw pt ukodet fs 10000 a 1
+
+# Chirp med jitter
+f 20 pri 0.1 pm jitter pt chirp fs 10000 a 1 dc 0.3 r 4
+
+# Barker med stagger
+#f 50 pri 0.1 pm stagger,0.1,0.15 pt barker n 4 dc 0.5 r 2 fs 10000
+
+# Pause 
+#fs 10000 pri 0.2 f 10 pm pause
+
+# Ukodet med dwell to dwell
+#f 50 fs 10000 pri 0.1 pm dwell,0.1,2,0.2,3 dc 0.5

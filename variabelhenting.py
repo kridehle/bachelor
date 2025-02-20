@@ -25,7 +25,7 @@ class BølgeVariabler:
 
     # Funksjon som gjør at en bruker visuelt kan verifisere variablene til et gitt objekt. Er så enkelt at variabeltype og verdi printes
     def verifiser_variabler(self):
-        print(f"Signalfrekvens: {self.signalfrekvens} Hz\nSamplingsfrekvens: {self.samplingsfrekvens} Hz\nPulsrepetisjonsintervall: {self.pulsrepetisjonsintervall} s\nAmplitude: {self.amplitude}\nDuty cycle: {self.duty_cycle}\nPuls type: {self.puls_type}\nBarker sekvens: {self.n_barker}\nPulsmønster: {self.pri_mønster}\nRepetisjoner: {self.repetisjoner}\nStagger verdier: {self.stagger_verdier}\nDwell verdier: {self.dwell_verdier}\nDwell repetisjoner: {self.dwell_repetisjoner}\n")
+        print(f"Signalfrekvens: {self.signalfrekvens} Hz\nSamplingsfrekvens: {self.samplingsfrekvens} Hz\nPulsrepetisjonsintervall: {self.pulsrepetisjonsintervall} s\nAmplitude: {self.amplitude}\nDuty cycle: {self.duty_cycle * 100} %\nPuls type: {self.puls_type}\nBarker sekvens: {self.n_barker}\nPulsmønster: {self.pri_mønster}\nRepetisjoner: {self.repetisjoner}\nStagger verdier: {self.stagger_verdier}\nDwell verdier: {self.dwell_verdier}\nDwell repetisjoner: {self.dwell_repetisjoner}\n")
 
 # Funksjon som leser en fil og separerer forskjellige linjer i filen. 
 # Dersom den finner en '#' tolkes dette som en kommentar og alt bak en '#' dumpes
@@ -76,7 +76,6 @@ def henter_variabler():
         standard_n_barker = 2
         standard_mønster = 'ukodet'
         standard_repetisjoner = 1
-        standard_stagger_verdier = 0
         standard_amplitude = 1
 
         # Henter signalfrekvens, hvis ikke får den standard verdi
@@ -114,17 +113,25 @@ def henter_variabler():
         # Mønster får den første delen 
         mønster = deler [0]
         # Stagger verdier får alle verdiene etter den første verdien
-        stagger_verdier = deler[1:]
-        # Stagger verdier lagres som floats
-        stagger_verdier = list(map(float, stagger_verdier))
-        # Dwell verider er annenhver av delene, og begynner på 1
-        dwell_verdier = deler[1::2]
-        # Gjør dwell verdier til floats
-        dwell_verdier = list(map(float, dwell_verdier))
-        # Dwell repetisjoner er annenhver av delene, og begynner på 2
-        dwell_repetisjoner = deler [2::2]
-        # Gjør dwell repetisjoner til ints
-        dwell_repetisjoner = list(map(int, dwell_repetisjoner))
+        
+        stagger_verdier = []
+        dwell_verdier = []
+        dwell_repetisjoner = []
+        
+        if mønster == 'stagger':
+            stagger_verdier = deler[1:]
+            # Stagger verdier lagres som floats
+            stagger_verdier = list(map(float, stagger_verdier))
+            
+        if mønster == 'dwell':    
+            # Dwell verider er annenhver av delene, og begynner på 1
+            dwell_verdier = deler[1::2]
+            # Gjør dwell verdier til floats
+            dwell_verdier = list(map(float, dwell_verdier))
+            # Dwell repetisjoner er annenhver av delene, og begynner på 2
+            dwell_repetisjoner = deler [2::2]
+            # Gjør dwell repetisjoner til ints
+            dwell_repetisjoner = list(map(int, dwell_repetisjoner))
 
         # Initierer total tid
         total_tid = np.array([])

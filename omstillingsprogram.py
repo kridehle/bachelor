@@ -9,6 +9,9 @@ def main():
 
     # En funksjon som henter og verifiserer variabler og lagrer de som objekter
     bølge_variabler = var.hent_og_verifiser_variabler()
+    
+    # En funksjon som tar brukerinput på om brukeren vil ha int eller float verdier
+    int_float = IQ_dat.int_eller_float()
 
     # Lager en tom liste for IQ data
     IQ_data_liste = []
@@ -31,18 +34,13 @@ def main():
         Q_signal = np.append(Q_signal, Q_signal_midlertidig)
 
     # Lager IQ data basert på 
-    IQ_data_liste = IQ_dat.lag_IQ_data(bølge_variabler[0], I_signal, Q_signal)
-
-    # Printer IQ data listen for å validere at dataen ser forholdsmessig riktig ut
-    # Det er anbefalt å ikke inkludere dette for å få en hyggelig brukeropplevelse
-    # Dette er kun tenkt for å studere IQ data, for å detektere om data lages riktig eller feil
-    # print(IQ_data_liste)
+    IQ_data_liste = IQ_dat.lag_IQ_data(int_float, I_signal, Q_signal)
 
     # Skriver IQ data til en fil
     IQ_dat.skriv_IQ_data(IQ_data_liste)
 
     # Plotter resultatet ved å sende hele objektet
-    IQ_dat.plott_resultat(bølge_variabler)
+    IQ_dat.plott_resultat(int_float, bølge_variabler)
 
 # Passer på at main kjører først
 if __name__ == "__main__":
