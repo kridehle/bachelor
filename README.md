@@ -14,7 +14,8 @@ I forkant av dette er det lurt å ha endret på verdiene som ligger i tekstfilen
 ## Hvordan legge inn variabler?
 
 Her er en oversikt over variablene man kan legge inn, og hvordan man gjør det. Merk, klammeparantesene er bare tilstede for å vise hva som hører til. Dersom du faktisk skal skrive inn verdier er ikke klammeparanteser nødvendig. Rekkefølgen på hvordan du skriver inn variablene er uvesentlig. En bølge defineres på en enkelt linje. Du kan legge til flere bølger etter hverandre med å skrive flere linjer med bølgevariabler under hverandre. Bølgene vil da bli produsert i rekkefølgen du har skrevet de opp i.
-´´´
+
+```
 signalfrekvens: f [ønsket frekvens i Hz]
 
 samplingsfrekvns: fs [ønsket samplingsfrekvens i Hz]
@@ -40,6 +41,4 @@ PRI mønster: pm [ønsket primønster]
 amplitude: a [ønsket amplitude]
 
 dutycycle: dc [ønsket dutycycle]
-
-
-´´´
+```
