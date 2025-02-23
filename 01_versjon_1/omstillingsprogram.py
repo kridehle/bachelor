@@ -26,11 +26,6 @@ def main():
     # Demoduler for å finne I og Q
     I = valgt_bølge * I_carrier  # I-komponenten
     Q = valgt_bølge * Q_carrier  # Q-komponenten
-    
-
-    
-    print("Mean of I:", np.mean(I))
-    print("Mean of Q:", np.mean(Q))
 
 
     # Kombiner I og Q til ett datasett

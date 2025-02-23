@@ -13,7 +13,7 @@ def main():
     # En funksjon som tar brukerinput på om brukeren vil ha int eller float verdier
     int_float = IQ_dat.int_eller_float()
 
-    # Lager en tom liste for IQ data
+    # Lager tomme lister for IQ data
     IQ_data_liste = []
     I_signal = []
     Q_signal = []

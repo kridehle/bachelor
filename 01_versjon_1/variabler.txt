@@ -6,6 +6,6 @@ PRI = 0.03
 dc = 0.2
 f = 500
 pk = barker
-fs = 200000
+fs = 1000
 n = 7
 pattern = jitter

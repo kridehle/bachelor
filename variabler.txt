@@ -1,10 +1,3 @@
-fs 750 a 3 f 150 pri 0.1 r 4 dc 0.4 pt barker n 7
-
-
-
-
-
-
 # Her kan man legge inn variabler for å definere bølger. 
 # For å gjøre det riktig, sett inn {parameterdeskriptor} {verdi} {parameterdeskriptor} {verdi} ... 
 # For stagger, skriv stagger,{verdi},{verdi},...
@@ -15,10 +8,10 @@ fs 750 a 3 f 150 pri 0.1 r 4 dc 0.4 pt barker n 7
 # Bølgene kommer til å lages i den rekkefølgen du skriver de opp i. Øverst først
 
 # Conitnuous wave
-#f 20 pri 0.1 pm cw pt ukodet fs 10000 a 1
+f 20 pri 0.1 pm cw pt ukodet fs 10000 a 1
 
 # Chirp med jitter
-#f 20 pri 0.1 pm jitter pt chirp fs 10000 a 1 dc 0.3 r 4
+f 20 pri 0.1 pm jitter pt chirp fs 10000 a 1 dc 0.3 r 4 a 2
 
 # Barker med stagger
 #f 50 pri 0.1 pm stagger,0.1,0.15 pt barker n 4 dc 0.5 r 2 fs 10000
