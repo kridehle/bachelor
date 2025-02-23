@@ -1,0 +1,1 @@
+pri 1 f 10 fs 1000 r 5 dc 0.5 pm jitter
