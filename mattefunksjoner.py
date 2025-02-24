@@ -8,7 +8,7 @@ def finn_total_tid(bølge_variabler):
     # Hvis stagger benyttes så benyttes sumen av stagger verdiene + en ekstra for å få en fin graf
     if bølge_variabler.pri_mønster == 'stagger':
         total_tid = sum(bølge_variabler.stagger_verdier) #+ bølge_variabler.stagger_verdier[len(bølge_variabler.stagger_verdier) - 1] #* (1-bølge_variabler.duty_cycle) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt
-    
+
     # Hvis dwell - dwell brukes regnes tidsvektoren ut på følgende måte
     elif bølge_variabler.pri_mønster == 'dwell':
 
@@ -27,7 +27,6 @@ def finn_total_tid(bølge_variabler):
     # Jitter og fixed får følgende total tid
     else:
         total_tid = (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.repetisjoner) #+ (bølge_variabler.pulsrepetisjonsintervall * bølge_variabler.duty_cycle) # Er bare for at plottet skal se fint ut. Verdien 2 kan helt fint endres, men ikke til mye mer før det kan bli problemer med antall repetisjoner
-    
     return total_tid
 
 

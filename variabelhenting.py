@@ -25,7 +25,7 @@ class BølgeVariabler:
 
     # Funksjon som gjør at en bruker visuelt kan verifisere variablene til et gitt objekt. Er så enkelt at variabeltype og verdi printes
     def verifiser_variabler(self):
-        print(f"Signalfrekvens: {self.signalfrekvens} Hz\nSamplingsfrekvens: {self.samplingsfrekvens} Hz\nPulsrepetisjonsintervall: {self.pulsrepetisjonsintervall} s\nAmplitude: {self.amplitude}\nDuty cycle: {self.duty_cycle * 100} %\nPuls type: {self.puls_type}\nBarker sekvens: {self.n_barker}\nPulsmønster: {self.pri_mønster}\nRepetisjoner: {self.repetisjoner}\nStagger verdier: {self.stagger_verdier}\nDwell verdier: {self.dwell_verdier}\nDwell repetisjoner: {self.dwell_repetisjoner}\n")
+        print(f"Signalfrekvens: {self.signalfrekvens} GHz\nSamplingsfrekvens: {self.samplingsfrekvens} GHz\nPulsrepetisjonsintervall: {self.pulsrepetisjonsintervall} us\nAmplitude: {self.amplitude}\nDuty cycle: {self.duty_cycle * 100} %\nPuls type: {self.puls_type}\nBarker sekvens: {self.n_barker}\nPulsmønster: {self.pri_mønster}\nRepetisjoner: {self.repetisjoner}\nStagger verdier: {self.stagger_verdier} us\nDwell verdier: {self.dwell_verdier} us/r\nDwell repetisjoner: {self.dwell_repetisjoner}\n")
 
 # Funksjon som leser en fil og separerer forskjellige linjer i filen. 
 # Dersom den finner en '#' tolkes dette som en kommentar og alt bak en '#' dumpes

@@ -120,7 +120,7 @@ def plott_resultat(int_float, bølge_variabler):
     # Plot rekonstruert signal på første subplot (øverste rutenett)
     axs[0].plot(tidsvektor, rekonstruert_signal, color='r', label='Rekonstruert signal')
     axs[0].set_title("Rekonstruert signal")
-    axs[0].set_xlabel("Tid [s]")
+    axs[0].set_xlabel("Tid [us]")
     axs[0].set_ylabel("Amplitude")
     axs[0].grid(True)
     axs[0].legend()
@@ -128,17 +128,17 @@ def plott_resultat(int_float, bølge_variabler):
     # Plot valideringsbølge på andre subplot (nederste rutenett)
     axs[1].plot(tidsvektor, valideringsbølge, color='b', label='Valideringsbølge')
     axs[1].set_title("Valideringsbølge")
-    axs[1].set_xlabel("Tid [s]")
+    axs[1].set_xlabel("Tid [us]")
     axs[1].set_ylabel("Amplitude")
     axs[1].grid(True)
     axs[1].legend()
 
 
     # Plot I og Q databølger
-    axs[2].plot(tidsvektor, I, color='b', label='I')
-    axs[2].plot(tidsvektor, Q, color='r', label='Q')
+    axs[2].plot(tidsvektor, I, color='green', label='I')
+    axs[2].plot(tidsvektor, Q, color='orange', label='Q')
     axs[2].set_title("I og Q data")
-    axs[2].set_xlabel("Tid [s]")
+    axs[2].set_xlabel("Tid [us]")
     axs[2].set_ylabel("Amplitude")
     axs[2].grid(True)
     axs[2].legend()
@@ -146,7 +146,7 @@ def plott_resultat(int_float, bølge_variabler):
     # Plot frekvensdomenet
     axs[3].plot(frekvenser[:N//10], magnitude[:N//10], color = 'b') 
     axs[3].set_title("Frekvensdomene")
-    axs[3].set_xlabel("Frekvens [Hz]")
+    axs[3].set_xlabel("Frekvens [GHz]")
     axs[3].set_ylabel("Magnitude")
     axs[3].grid(True)
 
