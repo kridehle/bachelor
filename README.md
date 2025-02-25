@@ -30,9 +30,9 @@ puls type/modulering: pt [ønsket pulstype]
 PRI mønster: pm [ønsket primønster]
   GODKJENTE PM VERDIER: ukodet, jitter, stagger, dwell, pause, cw
 
-  !NB! ved bruk av stagger:
+  ved bruk av stagger:
     pm stagger,[pri 1,[pri 2],...,[pri n] (pri i us)
-  !NB! ved bruk av dwell to dwell:
+  ved bruk av dwell to dwell:
     pm dwell,[pri 1],[repetisjoner 1],pri[2],repetisjoner 2],...,...,[pri n],[repetisjoner n] (pri i us)
   !NB! lengden på en cw eller en pause er definert av pri!
 
