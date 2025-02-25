@@ -146,7 +146,7 @@ def plott_resultat(int_float, bølge_variabler):
     # Plot frekvensdomenet
     axs[3].plot(frekvenser[:N//10], magnitude[:N//10], color = 'b') 
     axs[3].set_title("Frekvensdomene")
-    axs[3].set_xlabel("Frekvens [GHz]")
+    axs[3].set_xlabel("Frekvens [MHz]")
     axs[3].set_ylabel("Magnitude")
     axs[3].grid(True)
 
