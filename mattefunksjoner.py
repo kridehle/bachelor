@@ -365,14 +365,14 @@ def lag_endelig_bølge(bølge_variabler):
 
     # Her kalt for ukodet, dette er en sinusbølge.
     if bølge_variabler.puls_type == 'ukodet':
-        endelig_bølge_valg = sinusbølge(bølge_variabler)
+        endelig_bølge_valg, I_signal, Q_signal = sinusbølge(bølge_variabler)
     # Her kalt for chirp, dette er en chip bøgle
     elif bølge_variabler.puls_type == 'chirp':
-        endelig_bølge_valg = chirpbølge(bølge_variabler)
+        endelig_bølge_valg, I_signal, Q_signal = chirpbølge(bølge_variabler)
     # Her kalt for barker, dette er en barker bølge
     elif bølge_variabler.puls_type == 'barker':   
-        endelig_bølge_valg = barkerbølge(bølge_variabler)
+        endelig_bølge_valg, I_signal, Q_signal = barkerbølge(bølge_variabler)
     else:
     # Hvis ikke dette er valgt, er det en ugyldig puls type, og programmet avsluttes
         raise ValueError("Ugyldig puls type")
-    return endelig_bølge_valg
+    return endelig_bølge_valg, I_signal, Q_signal

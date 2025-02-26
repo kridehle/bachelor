@@ -1,5 +1,5 @@
 import variabelhenting as var
-import mattefunksjoner as m
+import mattefunksjoner as mat
 import IQ_data_konvertering as IQ_dat
 import numpy as np
 
@@ -22,22 +22,28 @@ def main():
     for objekt in bølge_variabler:
         
         # henter den totale tiden for gitt bølgelengde
-        objekt.total_tid = m.finn_total_tid(objekt)
+        objekt.total_tid = mat.finn_total_tid(objekt)
 
         # Lager en firkantpuls som styrer pulsrepetisjonsmønsteret
-        objekt.firkant_puls = m.firkantpuls(objekt)
+        objekt.firkant_puls = mat.firkantpuls(objekt)
 
-        # Lager en endelig bølge basert på valgt puls type og firkant puls
-        objekt.endelig_bølge, I_signal_midertidig, Q_signal_midlertidig = m.lag_endelig_bølge(objekt)
+        # Lager en endelig bølge basert på valgt puls type og firkant puls, Lager også I og Q bølge
+        objekt.endelig_bølge, I_signal_midertidig, Q_signal_midlertidig = mat.lag_endelig_bølge(objekt)
 
         I_signal = np.append(I_signal, I_signal_midertidig)
         Q_signal = np.append(Q_signal, Q_signal_midlertidig)
 
     # Lager IQ data basert på 
     IQ_data_liste = IQ_dat.lag_IQ_data(int_float, I_signal, Q_signal)
+    
+    
 
     # Skriver IQ data til en fil
     IQ_dat.skriv_IQ_data(IQ_data_liste)
+
+
+    # with np.printoptions(threshold=np.inf):
+    #   print(IQ_data_liste)
 
     # Plotter resultatet ved å sende hele objektet
     IQ_dat.plott_resultat(int_float, bølge_variabler)

@@ -15,7 +15,7 @@ def int_eller_float():
 
 
 # Funksjon som lager IQ data basert på valgt bølge
-def lag_IQ_data(int_float ,I_signal, Q_signal):
+def lag_IQ_data(int_float, I_signal, Q_signal):
 
     # Lager IQ data som float eller int. 
     # For int så må verdiene multipliseres for at de ikke skal bli satt til null. Det fordi at
