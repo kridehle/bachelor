@@ -27,7 +27,7 @@ def lag_IQ_data(int_float, I_signal, Q_signal):
     else:
         # Kombinerer I og Q til ett datasett som int med 16 bits
         # Standard skaleringsverdi for en 16 bits integer
-        int_skalar = 32767
+        int_skalar = 2047
         # Kombiner I og Q til ett datasett, og multipliserer verdiene med skalaren for å senere kunne transformere den til ints
         IQ_data = (np.column_stack((I_signal, Q_signal)) * int_skalar)
         
@@ -39,7 +39,7 @@ def lag_IQ_data(int_float, I_signal, Q_signal):
         IQ_data /= max_amplitude
 
         # IQ dataen lagres som en np.int16
-        IQ_data = IQ_data.astype(np.int16)  # Skaler fra [-1, 1] til [-32768, 32767] (må mulitpliseres med 32767 for å få riktig verdi)
+        IQ_data = IQ_data.astype(np.int16)  
 
     """
     NB! NB! Ved en grafisk plott av en binær fil som er laget med integraler vil tallene på y aksen
@@ -101,10 +101,10 @@ def plott_resultat(int_float, bølge_variabler):
         
         
     # Setter av en verdi som er lengden på det rekonsruerte signalet
-    N = len(rekonstruert_signal)
+    N = len(valideringsbølge)
     
     # Tar en foriertransform av det rekonsturerte signalet
-    fft_rekonsturert_signal = np.fft.fft(rekonstruert_signal)
+    fft_rekonsturert_signal = np.fft.fft(valideringsbølge)
     
     # Benytter numpy sin frekvensfunksjon til å definere en x akse laget av frekvenser
     frekvenser = np.fft.fftfreq(N, d = 1/bølge_variabler[0].samplingsfrekvens)
@@ -114,16 +114,16 @@ def plott_resultat(int_float, bølge_variabler):
         
         
     # Lag en figur med to subplotter (2 rader, 1 kolonne)
-    fig, axs = plt.subplots(4, 1, figsize=(20, 12))  # To grafiske rutenett (akse)
+    fig, axs = plt.subplots(3, 1, figsize=(20, 12))  # To grafiske rutenett (akse)
     fig.suptitle("Visuell plot av signalene")  # Tittel for hele figuren
 
-    # Plot rekonstruert signal på første subplot (øverste rutenett)
-    axs[0].plot(tidsvektor, rekonstruert_signal, color='r', label='Rekonstruert signal')
-    axs[0].set_title("Rekonstruert signal")
-    axs[0].set_xlabel("Tid [us]")
-    axs[0].set_ylabel("Amplitude")
-    axs[0].grid(True)
-    axs[0].legend()
+    # # Plot rekonstruert signal på første subplot (øverste rutenett)
+    # axs[0].plot(tidsvektor, rekonstruert_signal, color='r', label='Rekonstruert signal')
+    # axs[0].set_title("Rekonstruert signal")
+    # axs[0].set_xlabel("Tid [us]")
+    # axs[0].set_ylabel("Amplitude")
+    # axs[0].grid(True)
+    # axs[0].legend()
 
     # Plot valideringsbølge på andre subplot (nederste rutenett)
     axs[1].plot(tidsvektor, valideringsbølge, color='b', label='Valideringsbølge')
@@ -144,11 +144,11 @@ def plott_resultat(int_float, bølge_variabler):
     axs[2].legend()
 
     # Plot frekvensdomenet
-    axs[3].plot(frekvenser[:N//10], magnitude[:N//10], color = 'b') 
-    axs[3].set_title("Frekvensdomene")
-    axs[3].set_xlabel("Frekvens [MHz]")
-    axs[3].set_ylabel("Magnitude")
-    axs[3].grid(True)
+    axs[0].plot(frekvenser[:N//10], magnitude[:N//10], color = 'b') 
+    axs[0].set_title("Frekvensdomene")
+    axs[0].set_xlabel("Frekvens [MHz]")
+    axs[0].set_ylabel("Magnitude")
+    axs[0].grid(True)
 
 
     # Juster plasseringen av subplottene for å unngå overlapping

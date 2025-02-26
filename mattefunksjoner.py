@@ -210,8 +210,8 @@ def sinusbølge(bølge_variabler):
         fase = 2 * np.pi * bølge_variabler.signalfrekvens * tidsvektor
         sinus_bølge = bølge_variabler.amplitude * np.sin(fase)
         # Faseforskyver I og Q signalene noe, for å få det rekonsturerte signalet til å begynne på riktig måte
-        I_signal =    bølge_variabler.amplitude * np.cos(fase - np.pi/4)
-        Q_signal =    bølge_variabler.amplitude * np.sin(fase - np.pi/4)
+        I_signal =    bølge_variabler.amplitude * np.cos(fase)
+        Q_signal =    bølge_variabler.amplitude * np.sin(fase)
         
     if bølge_variabler.pri_mønster == 'pause':
         pass
@@ -234,9 +234,10 @@ def sinusbølge(bølge_variabler):
         #  Lager bølgene i en gitt tidsperiode
         fase = 2 * np.pi * bølge_variabler.signalfrekvens * lokal_tid
         sinus_bølge[start:slutt] = bølge_variabler.amplitude * np.sin(fase)
+        
         # Faseforskyver I og Q signalene noe for at det rekonstruerte signalet skal begynne på riktig tidspunkt
-        I_signal[start:slutt] =    bølge_variabler.amplitude * np.cos(fase - np.pi/4)
-        Q_signal[start:slutt] =    bølge_variabler.amplitude * np.sin(fase - np.pi/4)
+        I_signal[start:slutt] =    bølge_variabler.amplitude * np.cos(fase)
+        Q_signal[start:slutt] =    bølge_variabler.amplitude * np.sin(fase)
         
     return sinus_bølge, I_signal, Q_signal
 
@@ -278,8 +279,8 @@ def chirpbølge(bølge_variabler):
         fase = 2 * np.pi * (start_frekvens * lokal_tid + (slutt_frekvens - start_frekvens) / (2 * chirp_varighet) * lokal_tid**2) 
 
         # Generer I- og Q-signaler med korrekt chirp-frekvens. (frekvensen endres lineært fra start til slutt)
-        I_signal[start:slutt] = bølge_variabler.amplitude * np.cos(fase + np.pi / 4)
-        Q_signal[start:slutt] = bølge_variabler.amplitude * np.sin(fase + np.pi / 4)
+        I_signal[start:slutt] = bølge_variabler.amplitude * np.cos(fase)
+        Q_signal[start:slutt] = bølge_variabler.amplitude * np.sin(fase)
 
         # Generer selve chirp-bølgen (kan være lik I eller en annen definisjon)
         chirp_bølge[start:slutt] = bølge_variabler.amplitude * chirp(lokal_tid, start_frekvens, chirp_varighet, slutt_frekvens, method="linear")
@@ -354,8 +355,8 @@ def barkerbølge(bølge_variabler):
 
         # Multipliserer barker sekvensen med den lokale sinusbølgen for å modulere den. Det samme gjøres for I og Q signalene
         barker_bølge_endelig[start:slutt] = barker_bølge_sekvens[start:slutt] * lokal_sinus_bølge * bølge_variabler.amplitude
-        I_signal[start:slutt] = barker_bølge_sekvens[start:slutt] * np.cos(fase - np.pi /4) * bølge_variabler.amplitude 
-        Q_signal[start:slutt] = barker_bølge_sekvens[start:slutt] * np.sin(fase - np.pi /4) * bølge_variabler.amplitude
+        I_signal[start:slutt] = barker_bølge_sekvens[start:slutt] * np.cos(fase) * bølge_variabler.amplitude 
+        Q_signal[start:slutt] = barker_bølge_sekvens[start:slutt] * np.sin(fase) * bølge_variabler.amplitude
         
     return barker_bølge_endelig, I_signal, Q_signal
 
