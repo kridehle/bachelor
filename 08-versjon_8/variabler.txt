@@ -7,4 +7,4 @@
 # Du kan definere fler bølger etter hverandre hvis du vil. Bare ta et linjeskift så definers en ny bølge
 # Bølgene kommer til å lages i den rekkefølgen du skriver de opp i. Øverst først
 
-f 200 pri 0.1 pm cw pt ukodet fs 10000
+f 0 pri 0.1 pm cw pt ukodet fs 10000

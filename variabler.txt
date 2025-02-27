@@ -1,3 +1,3 @@
 
-f 0.00 fs 50 pri 100 dc 0.5 pm jitter r 2 pt chirp
+f 0 fs 61.44 pri 100 dc 0.5 pm jitter
 
