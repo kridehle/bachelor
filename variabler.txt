@@ -1,3 +1,0 @@
-
-f 0 fs 61.44 pri 100 dc 0.5 pm jitter
-
